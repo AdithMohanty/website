@@ -1,65 +1,253 @@
-import Image from "next/image";
+type Tag = { label: string; href?: string };
+
+type EntryData = {
+  title: string;
+  url?: string;
+  meta?: string;
+  tags?: Tag[];
+  sub: string;
+  body: string;
+  bullets?: string[];
+  image?: string;
+  imageAlt?: string;
+  logo?: boolean;
+  logoBg?: string;
+};
+
+const experience: EntryData[] = [
+  {
+    title: "IBM",
+    url: "https://www.ibm.com/products/ibm-z-database-assistant",
+    meta: "May – Aug 2026",
+    sub: "Software Engineer Intern · San Jose, CA",
+    body: "Built an AI-driven system that benchmarks how LLM agents perform in production, tailored to the mainframe environment the product runs on.",
+    bullets: [
+      "Built a distributed evaluation harness in Python running 30 concurrent multi-turn agent trajectories against IBM's ZDBA for DB2 at up to 6,000 questions/hour, cutting manual review from days to two hours.",
+      "Designed a model-based grader on watsonx combining rubric-based scoring and pairwise comparison, with a reason-before-score contract and temperature-0 decoding for deterministic, reproducible scores.",
+      "Extended the grader to assess tool-call efficiency against SME-defined expected calls, revealing only 82% of trajectories used tools efficiently versus a 95% estimate, and fed flagged runs into early-stopping logic.",
+      "Validated against a 12,000-question, 15-agent dataset, establishing ground-truth benchmarks at 90% agent accuracy.",
+    ],
+    image: "/media/ibm.svg",
+    imageAlt: "IBM",
+    logo: true,
+    logoBg: "#ffffff",
+  },
+  {
+    title: "DealMover.ai",
+    url: "https://dealmover.ai/",
+    meta: "Mar – May 2026",
+    sub: "Software Engineer · AI-native commercial underwriting",
+    body: "Worked on an AI-native platform for commercial underwriting — document ingestion, AI-assisted suggestions, and smart extraction of financial data.",
+    bullets: [
+      "Built an LLM classification pipeline (Llama 3 via Ollama) that auto-sorts and tags uploaded lending documents using scope-aware prompts and a keyword fast-path, reducing GPU compute costs by 50%.",
+      "Built a multi-agent extraction pipeline that parsed 200+ earnings reports and financial documents, populating 100+ structured fields per canonical schema at 95% accuracy.",
+      "Implemented formula logic linking extracted line items to auto-calculated derived metrics like EBITDA, adapting across varying company cost structures without manual reconfiguration.",
+    ],
+    image: "/media/dealmover.png",
+    imageAlt: "DealMover.ai",
+    logo: true,
+    logoBg: "#14141a",
+  },
+  {
+    title: "Cisco Systems",
+    url: "https://www.cisco.com/site/us/en/products/networking/cloud-networking/application-centric-infrastructure/index.html",
+    meta: "May – Aug 2025",
+    sub: "Software Engineer Intern · San Jose, CA",
+    body: "Built and deployed a release-management dashboard for Cisco ACI's 40-person build and infrastructure team.",
+    bullets: [
+      "Shipped the dashboard on Kubernetes (Django, React, PostgreSQL), tracking regression runs and test-suite results per release and cutting time spent on manual release monitoring.",
+      "Implemented LDAP authentication with role-based access, letting managers reassign and view test-suite ownership.",
+      "Diagnosed slow legacy queries and added a Redis caching layer, cutting dashboard load times from several seconds to roughly 100ms.",
+    ],
+    image: "/media/cisco.svg",
+    imageAlt: "Cisco Systems",
+    logo: true,
+    logoBg: "#ffffff",
+  },
+  {
+    title: "Reyes Coca-Cola Bottling",
+    url: "https://reyescocacola.com/our-brands",
+    meta: "Dec 2024 – Mar 2025",
+    sub: "Machine Learning Engineer (Contract) · Berkeley, CA",
+    body: "Built sentiment-analysis models and a streaming pipeline to improve sales forecasting.",
+    bullets: [
+      "Developed sentiment models using VADER NLP, LDA topic modeling, and TF-IDF, trained on 10k+ consumer records scraped from X, Reddit, and Google via SerpApi.",
+      "Cut forecast error (MAPE) by 20% with a streaming ETL pipeline (Kafka, AWS SQS) feeding live sentiment data into the forecasting model.",
+      "Trained models on Berkeley GPU clusters with SLURM scheduling and deployed inference on CUDA-enabled servers.",
+    ],
+    image: "/media/reyes.svg",
+    imageAlt: "Reyes Coca-Cola Bottling",
+    logo: true,
+    logoBg: "#14141a",
+  },
+];
+
+const projects: EntryData[] = [
+  {
+    title: "Distance-Vector Router",
+    tags: [{ label: "github", href: "https://github.com/adithmohanty" }],
+    sub: "Python · Socket Programming · Distributed Systems",
+    body: "A distributed routing protocol built from scratch, mirroring the core mechanisms behind BGP and RIP.",
+    bullets: [
+      "Routers exchange advertisements and run Bellman-Ford to compute shortest-path forwarding tables across a multi-router network simulation.",
+      "Implemented loop prevention (split horizon, poison reverse) and convergence optimizations (triggered updates, route expiration) for fast, stable reconvergence after topology changes.",
+    ],
+    image: "/media/router.png",
+    imageAlt: "Network topology of the distance-vector router simulation",
+  },
+];
+
+function Media({
+  src,
+  alt,
+  logo,
+  logoBg,
+}: {
+  src?: string;
+  alt?: string;
+  logo?: boolean;
+  logoBg?: string;
+}) {
+  return (
+    <div
+      className={`entry-media${logo ? " entry-media--logo" : ""}`}
+      style={logo && logoBg ? { background: logoBg } : undefined}
+    >
+      {src ? (
+        <img src={src} alt={alt ?? ""} loading="lazy" />
+      ) : (
+        <svg
+          className="entry-media-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.4}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <circle cx="8.5" cy="8.5" r="1.6" />
+          <path d="M21 15l-5-5L5 21" />
+        </svg>
+      )}
+    </div>
+  );
+}
+
+function ArrowIcon() {
+  return (
+    <svg
+      className="entry-arrow"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M7 17L17 7M8 7h9v9" />
+    </svg>
+  );
+}
+
+function Entry({ e }: { e: EntryData }) {
+  return (
+    <article className="entry">
+      <Media src={e.image} alt={e.imageAlt} logo={e.logo} logoBg={e.logoBg} />
+      <div className="entry-main">
+        <div className="entry-head">
+          <h2 className="entry-title">
+            {e.url ? (
+              <a className="entry-title-link" href={e.url}>
+                {e.title}
+                <ArrowIcon />
+              </a>
+            ) : (
+              e.title
+            )}
+          </h2>
+          {e.tags ? (
+            <div className="tags">
+              {e.tags.map((t) =>
+                t.href ? (
+                  <a key={t.label} className="tag" href={t.href}>
+                    {t.label}
+                  </a>
+                ) : (
+                  <span key={t.label} className="tag">
+                    {t.label}
+                  </span>
+                )
+              )}
+            </div>
+          ) : e.meta ? (
+            <span className="entry-meta">{e.meta}</span>
+          ) : null}
+        </div>
+        <p className="entry-sub">{e.sub}</p>
+        <p className="entry-body">{e.body}</p>
+        {e.bullets && (
+          <ul className="entry-bullets">
+            {e.bullets.map((b, i) => (
+              <li key={i}>{b}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </article>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="page">
+      <h1 className="name">Adith Mohanty</h1>
+      <p className="tagline">Data Science &amp; Applied Mathematics · UC Berkeley</p>
+
+      <div className="intro">
+        <p>
+          I&apos;m an adaptive builder working on AI systems, developer tools,
+          and full-stack products — across applied AI, enterprise
+          infrastructure, and fintech. Right now I&apos;m a senior at{" "}
+          <strong>UC Berkeley</strong> studying Data Science and Applied Math.
+        </p>
+        <p>
+          Most recently I interned at <strong>IBM</strong>, building an
+          AI-driven system that benchmarks how LLM agents perform in production,
+          tailored to the mainframe environment the product runs on. Before that
+          I was a software engineer at a stealth startup building an AI-native
+          platform for commercial underwriting — document ingestion, AI-assisted
+          suggestions, and smart extraction of financial data.
+        </p>
+        <p>
+          I&apos;m genuinely obsessed with CS and machine learning, and always
+          looking to go deeper into infrastructure, tooling, and applied AI.
+          What runs through all of it: pick a hard problem, build it end to end,
+          and get it in front of real users.
+        </p>
+      </div>
+
+      <p className="links">
+        <a href="mailto:adithm@berkeley.edu">Email</a>
+        <span className="sep">/</span>
+        <a href="https://linkedin.com/in/adithmohanty">LinkedIn</a>
+        <span className="sep">/</span>
+        <a href="https://github.com/adithmohanty">GitHub</a>
+      </p>
+
+      <p className="section-label">Experience</p>
+      <div className="rule" />
+      {experience.map((e) => (
+        <Entry key={e.title} e={e} />
+      ))}
+
+      <p className="section-label">Projects</p>
+      <div className="rule" />
+      {projects.map((e) => (
+        <Entry key={e.title} e={e} />
+      ))}
+    </main>
   );
 }
