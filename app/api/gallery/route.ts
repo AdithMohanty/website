@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { isAuthorized } from "@/lib/auth";
-import { addPhoto, listPhotos, removePhoto } from "@/lib/photos";
+import { listPhotos } from "@/lib/gallery";
+import { addPhoto, removePhoto } from "@/lib/photos";
 
 export async function GET() {
   return Response.json(await listPhotos());

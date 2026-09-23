@@ -1,4 +1,20 @@
-import { listPhotos } from "./photos";
+import { getValue } from "./store";
+
+// Reading the gallery list only. Uploading lives in lib/photos.ts, which pulls
+// in the image tools; keep those out of pages.
+
+export const GALLERY_KEY = "gallery";
+
+export type Photo = {
+  id: string;
+  src: string;
+  width: number;
+  height: number;
+  date?: string; // YYYY-MM-DD, local time where it was taken
+  place?: string;
+  name?: string; // original filename, used to skip re-uploads
+  addedAt: string;
+};
 
 // What the gallery page shows for each photo.
 export type GalleryPhoto = {
@@ -8,6 +24,11 @@ export type GalleryPhoto = {
   place: string;
   date: string;
 };
+
+export async function listPhotos(): Promise<Photo[]> {
+  const photos = (await getValue<Photo[]>(GALLERY_KEY)) ?? [];
+  return photos.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+}
 
 function formatDate(date?: string) {
   if (!date) return "";

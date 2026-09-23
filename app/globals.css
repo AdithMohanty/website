@@ -167,6 +167,10 @@ a:hover {
 }
 
 .nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 4px;
   font-size: 15px;
 }
 

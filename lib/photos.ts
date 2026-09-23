@@ -1,8 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { del, put } from "@vercel/blob";
-import exifr from "exifr";
-import sharp from "sharp";
+import { GALLERY_KEY as KEY, type Photo } from "./gallery";
 import { lookupPlace, placeName } from "./places.mjs";
 import { getValue, setValue } from "./store";
 
@@ -10,25 +9,8 @@ import { getValue, setValue } from "./store";
 // same store as the location. Without a Blob token (local dev) images are
 // written to public/uploads/ instead.
 
-const KEY = "gallery";
 const MAX_SIZE = 2000;
 const LOCAL_DIR = path.join(process.cwd(), "public", "uploads");
-
-export type Photo = {
-  id: string;
-  src: string;
-  width: number;
-  height: number;
-  date?: string; // YYYY-MM-DD, local time where it was taken
-  place?: string;
-  name?: string; // original filename, used to skip re-uploads
-  addedAt: string;
-};
-
-export async function listPhotos(): Promise<Photo[]> {
-  const photos = (await getValue<Photo[]>(KEY)) ?? [];
-  return photos.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
-}
 
 // "2024:07:31 13:53:52" (EXIF) or "2024-07-31T13:53:52-07:00" (Shortcuts) -> "2024-07-31"
 function toDay(raw: unknown) {
@@ -44,6 +26,12 @@ function toNumber(v: unknown) {
 type Hints = { date?: unknown; lat?: unknown; lon?: unknown; name?: unknown };
 
 export async function addPhoto(input: Buffer, hints: Hints = {}): Promise<Photo> {
+  // Loaded here, not at the top, so only uploads need the native image library.
+  const [{ default: exifr }, { default: sharp }] = await Promise.all([
+    import("exifr"),
+    import("sharp"),
+  ]);
+
   // Date and GPS: from the fields the sender passed, else from the photo itself.
   const exif = (await exifr
     .parse(input, { gps: true, reviveValues: false })
