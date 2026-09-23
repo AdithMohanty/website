@@ -27,7 +27,6 @@ export default function CurrentLocation() {
 
   if (!loc?.known) return null;
 
-  const place = [loc.city, loc.region].filter(Boolean).join(", ");
   const weather =
     loc.tempF !== undefined
       ? `, where it's ${loc.tempF}°F${loc.condition ? ` and ${loc.condition}` : ""}`
@@ -35,7 +34,7 @@ export default function CurrentLocation() {
 
   return (
     <p className="current-location">
-      I am currently in <strong>{place}</strong>
+      I am currently in <strong>{loc.place}</strong>
       {weather}.
     </p>
   );

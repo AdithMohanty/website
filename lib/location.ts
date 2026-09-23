@@ -8,6 +8,7 @@ type StoredLocation = {
   city: string;
   region?: string;
   country?: string;
+  countryCode?: string;
   lat: number;
   lon: number;
   updatedAt: string;
@@ -17,6 +18,7 @@ export type PublicLocation =
   | { known: false }
   | {
       known: true;
+      place: string;
       city: string;
       region?: string;
       country?: string;
@@ -26,12 +28,46 @@ export type PublicLocation =
       updatedAt: string;
     };
 
+// "Berkeley, CA" in the US, "Paris, France" elsewhere.
+function placeName({ city, region, country, countryCode }: StoredLocation) {
+  const other = countryCode === "us" ? region : country;
+  return other && other !== city ? `${city}, ${other}` : city;
+}
+
 function coarse(n: number) {
   return Math.round(n * 10) / 10;
 }
 
 function clean(v: unknown, max = 80) {
   return typeof v === "string" ? v.trim().slice(0, max) : "";
+}
+
+// State and country come from the coordinates (OpenStreetMap's Nominatim),
+// so the phone only has to send city, lat and lon.
+async function lookupPlace(lat: number, lon: number) {
+  try {
+    const res = await fetch(
+      "https://nominatim.openstreetmap.org/reverse?" +
+        new URLSearchParams({ lat: String(lat), lon: String(lon), format: "jsonv2", zoom: "5" }),
+      {
+        headers: { "User-Agent": "adithmohanty.com location widget", "Accept-Language": "en" },
+        cache: "no-store",
+        signal: AbortSignal.timeout(5000),
+      }
+    );
+    if (!res.ok) return {};
+    const { address = {} } = (await res.json()) as { address?: Record<string, string> };
+    const countryCode = address.country_code?.toLowerCase();
+    // e.g. "US-CA" -> "CA"
+    const stateCode = address["ISO3166-2-lvl4"]?.split("-")[1];
+    return {
+      country: address.country,
+      countryCode,
+      region: countryCode === "us" ? stateCode : address.state,
+    };
+  } catch {
+    return {};
+  }
 }
 
 export async function saveLocation(body: Record<string, unknown>) {
@@ -41,10 +77,13 @@ export async function saveLocation(body: Record<string, unknown>) {
   if (!city || !Number.isFinite(lat) || !Number.isFinite(lon)) {
     throw new Error("Send city, lat and lon.");
   }
+  // Rounded to ~1 km for the lookup; stored rounded to ~10 km.
+  const found = await lookupPlace(Math.round(lat * 100) / 100, Math.round(lon * 100) / 100);
   const loc: StoredLocation = {
     city,
-    region: clean(body.region ?? body.state) || undefined,
-    country: clean(body.country) || undefined,
+    region: found.region ?? (clean(body.region ?? body.state) || undefined),
+    country: found.country ?? (clean(body.country) || undefined),
+    countryCode: found.countryCode,
     lat: coarse(lat),
     lon: coarse(lon),
     updatedAt: new Date().toISOString(),
@@ -107,6 +146,7 @@ export async function getPublicLocation(): Promise<PublicLocation> {
   const weather = await getWeather(loc.lat, loc.lon).catch(() => null);
   return {
     known: true,
+    place: placeName(loc),
     city: loc.city,
     region: loc.region,
     country: loc.country,
