@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Newsreader } from "next/font/google";
 import "./globals.css";
-import ThemeToggle from "./ThemeToggle";
-
+import Grid from "./Grid";
+import NowPlaying from "./NowPlaying";
 const themeScript = `(function(){try{var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
 
 const geistSans = Geist({
@@ -19,7 +19,7 @@ const newsreader = Newsreader({
 export const metadata: Metadata = {
   title: "Adith Mohanty",
   description:
-    "Adith Mohanty — adaptive builder working on AI systems, developer tools, and full-stack products. Data Science and Applied Math at UC Berkeley.",
+    "Adith Mohanty, builder working on AI systems, developer tools, and full-stack products. Data Science and Applied Math at UC Berkeley.",
 };
 
 export default function RootLayout({
@@ -37,8 +37,9 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <ThemeToggle />
         {children}
+        <Grid />
+        <NowPlaying />
       </body>
     </html>
   );

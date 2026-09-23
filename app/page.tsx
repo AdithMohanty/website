@@ -1,3 +1,7 @@
+import Nav from "./Nav";
+import EntryBullets from "./EntryBullets";
+import CurrentLocation from "./CurrentLocation";
+
 type Tag = { label: string; href?: string };
 
 type EntryData = {
@@ -37,7 +41,7 @@ const experience: EntryData[] = [
     url: "https://dealmover.ai/",
     meta: "Mar – May 2026",
     sub: "Software Engineer · AI-native commercial underwriting",
-    body: "Worked on an AI-native platform for commercial underwriting — document ingestion, AI-assisted suggestions, and smart extraction of financial data.",
+    body: "Worked on an AI-native platform for commercial underwriting: document ingestion, AI-assisted suggestions, and extraction of financial data.",
     bullets: [
       "Built an LLM classification pipeline (Llama 3 via Ollama) that auto-sorts and tags uploaded lending documents using scope-aware prompts and a keyword fast-path, reducing GPU compute costs by 50%.",
       "Built a multi-agent extraction pipeline that parsed 200+ earnings reports and financial documents, populating 100+ structured fields per canonical schema at 95% accuracy.",
@@ -188,13 +192,7 @@ function Entry({ e }: { e: EntryData }) {
         </div>
         <p className="entry-sub">{e.sub}</p>
         <p className="entry-body">{e.body}</p>
-        {e.bullets && (
-          <ul className="entry-bullets">
-            {e.bullets.map((b, i) => (
-              <li key={i}>{b}</li>
-            ))}
-          </ul>
-        )}
+        {e.bullets && <EntryBullets bullets={e.bullets} />}
       </div>
     </article>
   );
@@ -202,31 +200,42 @@ function Entry({ e }: { e: EntryData }) {
 
 export default function Home() {
   return (
-    <main className="page">
-      <h1 className="name">Adith Mohanty</h1>
-      <p className="tagline">Data Science &amp; Applied Mathematics · UC Berkeley</p>
+    <>
+      <header className="hero">
+        <Nav />
+        <div className="hero-inner">
+          <div className="hero-media" aria-hidden="true">
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                poster="/media/background-poster.jpg"
+              >
+                <source src="/media/background.mp4" type="video/mp4" />
+              </video>
+            </div>
+            <div className="hero-content">
+              <h1 className="name" id="about">Adith Mohanty</h1>
+          <p className="tagline">
+            Data Science &amp; Applied Mathematics · UC Berkeley
+          </p>
 
       <div className="intro">
         <p>
-          I&apos;m an adaptive builder working on AI systems, developer tools,
-          and full-stack products — across applied AI, enterprise
-          infrastructure, and fintech. Right now I&apos;m a senior at{" "}
-          <strong>UC Berkeley</strong> studying Data Science and Applied Math.
+          Hey! I like to make cool things and work on hard problems. I have worked across the stack building
+          AI products in infrastrucutre, finance, and developer tools.
         </p>
         <p>
-          Most recently I interned at <strong>IBM</strong>, building an
-          AI-driven system that benchmarks how LLM agents perform in production,
-          tailored to the mainframe environment the product runs on. Before that
-          I was a software engineer at a stealth startup building an AI-native
-          platform for commercial underwriting — document ingestion, AI-assisted
-          suggestions, and smart extraction of financial data.
+          I value environements where my work is used on day 1. Building systems that spark excitement or have use is why I build.
+          Most recently I was able to do this at IBM, building systems for LLM agent evals that uniquely run on production mainframe environments.
         </p>
         <p>
-          I&apos;m genuinely obsessed with CS and machine learning, and always
-          looking to go deeper into infrastructure, tooling, and applied AI.
-          What runs through all of it: pick a hard problem, build it end to end,
-          and get it in front of real users.
+          I am currently exploring physical AI through classes (EECS 116, CS 188), projects (cool robot arm), and pulling all nighters in MuJoCo. I also led a VEX Robotics team to
+          the State and National Finals, and won both hardware and control awards at over 20+ competitions.
         </p>
+        <CurrentLocation />
       </div>
 
       <p className="links">
@@ -235,19 +244,26 @@ export default function Home() {
         <a href="https://linkedin.com/in/adithmohanty">LinkedIn</a>
         <span className="sep">/</span>
         <a href="https://github.com/adithmohanty">GitHub</a>
-      </p>
+        <span className="sep">/</span>
+        <a href="https://www.instagram.com/adithjm/?hl=en">Instagram</a>
+            </p>
+            </div>
+        </div>
+      </header>
 
-      <p className="section-label">Experience</p>
+      <main className="page-body">
+        <p className="section-label" id="experience">Experience</p>
       <div className="rule" />
       {experience.map((e) => (
         <Entry key={e.title} e={e} />
       ))}
 
-      <p className="section-label">Projects</p>
+      <p className="section-label" id="projects">Projects</p>
       <div className="rule" />
       {projects.map((e) => (
         <Entry key={e.title} e={e} />
       ))}
-    </main>
+      </main>
+    </>
   );
 }

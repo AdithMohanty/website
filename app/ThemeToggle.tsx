@@ -50,11 +50,16 @@ export default function ThemeToggle() {
 
   const toggle = () => {
     const next: Theme = theme === "dark" ? "light" : "dark";
+    const root = document.documentElement;
+    root.classList.add("theme-no-transition");
+    root.setAttribute("data-theme", next);
     setTheme(next);
-    document.documentElement.setAttribute("data-theme", next);
     try {
       localStorage.setItem("theme", next);
     } catch {}
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => root.classList.remove("theme-no-transition"));
+    });
   };
 
   return (
