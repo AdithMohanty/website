@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { del, put } from "@vercel/blob";
+import { env } from "./env";
 import { GALLERY_KEY as KEY, type Photo } from "./gallery";
 import { lookupPlace, placeName } from "./places.mjs";
 import { getValue, setValue } from "./store";
@@ -10,6 +11,7 @@ import { getValue, setValue } from "./store";
 // written to public/uploads/ instead.
 
 const MAX_SIZE = 2000;
+const blobToken = () => env("BLOB_READ_WRITE_TOKEN");
 const LOCAL_DIR = path.join(process.cwd(), "public", "uploads");
 
 // "2024:07:31 13:53:52" (EXIF) or "2024-07-31T13:53:52-07:00" (Shortcuts) -> "2024-07-31"
@@ -50,14 +52,19 @@ export async function addPhoto(input: Buffer, hints: Hints = {}): Promise<Photo>
 
   const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
   let src: string;
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  const token = blobToken();
+  if (token) {
     const blob = await put(`gallery/${id}.jpg`, data, {
       access: "public",
       contentType: "image/jpeg",
+      token,
     });
     src = blob.url;
   } else if (process.env.VERCEL) {
-    throw new Error("No Blob store found. Connect one in Vercel (Storage tab), then redeploy.");
+    throw new Error(
+      "No BLOB_READ_WRITE_TOKEN found. In Vercel, connect the Blob store to this project " +
+        "(including Production), then redeploy."
+    );
   } else {
     await fs.mkdir(LOCAL_DIR, { recursive: true });
     await fs.writeFile(path.join(LOCAL_DIR, `${id}.jpg`), data);
@@ -86,7 +93,7 @@ export async function removePhoto(id: string) {
   if (photo.src.startsWith("/uploads/")) {
     await fs.rm(path.join(process.cwd(), "public", photo.src), { force: true });
   } else {
-    await del(photo.src);
+    await del(photo.src, { token: blobToken() });
   }
   await setValue(
     KEY,

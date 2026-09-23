@@ -1,15 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { env } from "./env";
 
 // Upstash Redis when configured (needed on Vercel), otherwise a file in .data/.
-// Vercel's integration may add a prefix, e.g. STORAGE_KV_REST_API_URL.
-function env(...suffixes: string[]) {
-  for (const suffix of suffixes) {
-    const key = Object.keys(process.env).find((k) => k === suffix || k.endsWith(`_${suffix}`));
-    if (key && process.env[key]) return process.env[key];
-  }
-}
-
 const url = env("UPSTASH_REDIS_REST_URL", "KV_REST_API_URL");
 const token = env("UPSTASH_REDIS_REST_TOKEN", "KV_REST_API_TOKEN");
 const DATA_DIR = path.join(process.cwd(), ".data");
