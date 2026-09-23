@@ -4,7 +4,8 @@ import Nav from "../Nav";
 import { formatDate, getPosts } from "@/lib/posts";
 
 export const metadata: Metadata = {
-  title: "Blog · Adith Mohanty",
+  title: "Blog",
+  alternates: { canonical: "/blog" },
 };
 
 export default function BlogPage() {

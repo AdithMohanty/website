@@ -4,11 +4,15 @@ import GalleryGrid from "./GalleryGrid";
 import { getPhotos } from "@/lib/gallery";
 
 export const metadata: Metadata = {
-  title: "Gallery · Adith Mohanty",
+  title: "Gallery",
+  alternates: { canonical: "/gallery" },
 };
 
-export default function GalleryPage() {
-  const photos = getPhotos();
+// Uploads refresh the page right away; this is just a fallback.
+export const revalidate = 300;
+
+export default async function GalleryPage() {
+  const photos = await getPhotos();
 
   return (
     <>

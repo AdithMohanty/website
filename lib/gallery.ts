@@ -1,33 +1,27 @@
-import fs from "node:fs";
-import path from "node:path";
+import { listPhotos } from "./photos";
 
-// Images in public/gallery/, newest filename first. Caption comes from the
-// filename: 2026-08-golden-gate.jpg -> "Golden gate".
-const GALLERY_DIR = path.join(process.cwd(), "public", "gallery");
-const IMAGE_EXT = /\.(jpe?g|png|webp|gif|avif)$/i;
-
-export type Photo = {
+// What the gallery page shows for each photo.
+export type GalleryPhoto = {
   src: string;
-  caption: string;
+  width?: number;
+  height?: number;
+  place: string;
+  date: string;
 };
 
-function captionFromFile(file: string) {
-  const base = file
-    .replace(IMAGE_EXT, "")
-    .replace(/^\d{4}-\d{2}(-\d{2})?[-_ ]*/, "")
-    .replace(/[-_]+/g, " ")
-    .trim();
-  return base ? base.charAt(0).toUpperCase() + base.slice(1) : "";
+function formatDate(date?: string) {
+  if (!date) return "";
+  const d = new Date(`${date}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-export function getPhotos(): Photo[] {
-  if (!fs.existsSync(GALLERY_DIR)) return [];
-  return fs
-    .readdirSync(GALLERY_DIR)
-    .filter((f) => IMAGE_EXT.test(f))
-    .sort((a, b) => b.localeCompare(a))
-    .map((f) => ({
-      src: `/gallery/${encodeURIComponent(f)}`,
-      caption: captionFromFile(f),
-    }));
+export async function getPhotos(): Promise<GalleryPhoto[]> {
+  return (await listPhotos()).map((p) => ({
+    src: p.src,
+    width: p.width,
+    height: p.height,
+    place: p.place ?? "",
+    date: formatDate(p.date),
+  }));
 }

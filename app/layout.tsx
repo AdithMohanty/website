@@ -16,10 +16,23 @@ const newsreader = Newsreader({
   weight: "500",
 });
 
+// What search results and link previews show. Change the text here.
+const title = "Adith Mohanty";
+const description =
+  "Portfolio of Adith Mohanty — Data Science and Applied Math at UC Berkeley.";
+
 export const metadata: Metadata = {
-  title: "Adith Mohanty",
-  description:
-    "Adith Mohanty, builder working on AI systems, developer tools, and full-stack products. Data Science and Applied Math at UC Berkeley.",
+  metadataBase: new URL("https://adithmohanty.com"),
+  title: { default: title, template: `%s · ${title}` },
+  description,
+  openGraph: {
+    title,
+    description,
+    url: "/",
+    siteName: title,
+    type: "website",
+  },
+  twitter: { card: "summary", title, description },
 };
 
 export default function RootLayout({

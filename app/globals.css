@@ -767,8 +767,39 @@ a:hover {
 
 /* ── Gallery ── */
 .gallery {
-  columns: 3 200px;
-  column-gap: 16px;
+  display: none;
+  gap: 16px;
+  align-items: start;
+}
+
+.gallery-column {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Phones: 1 column, small tablets: 2, wider: 3. */
+.gallery--1 {
+  display: flex;
+}
+
+@media (min-width: 480px) {
+  .gallery--1 {
+    display: none;
+  }
+
+  .gallery--2 {
+    display: flex;
+  }
+}
+
+@media (min-width: 760px) {
+  .gallery--2 {
+    display: none;
+  }
+
+  .gallery--3 {
+    display: flex;
+  }
 }
 
 .gallery-item {
@@ -782,7 +813,6 @@ a:hover {
   overflow: hidden;
   background: var(--media-bg);
   cursor: zoom-in;
-  break-inside: avoid;
 }
 
 .gallery-item img {
@@ -801,11 +831,13 @@ a:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 24px 12px 10px;
-  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 12px 10px;
   text-align: left;
+  line-height: 1.35;
   color: #fff;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.55));
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
   opacity: 0;
   transition: opacity 0.2s ease;
 }
@@ -813,6 +845,23 @@ a:hover {
 .gallery-item:hover .gallery-caption,
 .gallery-item:focus-visible .gallery-caption {
   opacity: 1;
+}
+
+/* No hover on phones, so always show the caption there. */
+@media (hover: none) {
+  .gallery-caption {
+    opacity: 1;
+  }
+}
+
+.photo-place {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.photo-date {
+  font-size: 12px;
+  opacity: 0.8;
 }
 
 .lightbox {
@@ -841,9 +890,15 @@ a:hover {
 }
 
 .lightbox figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   margin-top: 12px;
-  font-size: 14px;
   color: #d4d4d8;
+}
+
+.lightbox .photo-place {
+  font-size: 14px;
 }
 
 .lightbox-close {

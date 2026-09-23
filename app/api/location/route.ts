@@ -1,4 +1,4 @@
-import { timingSafeEqual } from "node:crypto";
+import { isAuthorized } from "@/lib/auth";
 import { getPublicLocation, saveLocation } from "@/lib/location";
 
 export async function GET() {
@@ -7,17 +7,10 @@ export async function GET() {
   });
 }
 
-function authorized(req: Request) {
-  const secret = process.env.LOCATION_SECRET;
-  const given = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
-  if (!secret || given.length !== secret.length) return false;
-  return timingSafeEqual(Buffer.from(given), Buffer.from(secret));
-}
-
 // Sent by the phone shortcut: Authorization: Bearer <LOCATION_SECRET>,
 // body { city, region, lat, lon }.
 export async function POST(req: Request) {
-  if (!authorized(req)) {
+  if (!isAuthorized(req)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {

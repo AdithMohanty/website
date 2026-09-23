@@ -1,3 +1,4 @@
+import { lookupPlace, placeName } from "./places.mjs";
 import { getValue, setValue } from "./store";
 
 // Only the city and coordinates rounded to ~10 km are stored.
@@ -28,12 +29,6 @@ export type PublicLocation =
       updatedAt: string;
     };
 
-// "Berkeley, CA" in the US, "Paris, France" elsewhere.
-function placeName({ city, region, country, countryCode }: StoredLocation) {
-  const other = countryCode === "us" ? region : country;
-  return other && other !== city ? `${city}, ${other}` : city;
-}
-
 function coarse(n: number) {
   return Math.round(n * 10) / 10;
 }
@@ -42,34 +37,8 @@ function clean(v: unknown, max = 80) {
   return typeof v === "string" ? v.trim().slice(0, max) : "";
 }
 
-// State and country come from the coordinates (OpenStreetMap's Nominatim),
-// so the phone only has to send city, lat and lon.
-async function lookupPlace(lat: number, lon: number) {
-  try {
-    const res = await fetch(
-      "https://nominatim.openstreetmap.org/reverse?" +
-        new URLSearchParams({ lat: String(lat), lon: String(lon), format: "jsonv2", zoom: "5" }),
-      {
-        headers: { "User-Agent": "adithmohanty.com location widget", "Accept-Language": "en" },
-        cache: "no-store",
-        signal: AbortSignal.timeout(5000),
-      }
-    );
-    if (!res.ok) return {};
-    const { address = {} } = (await res.json()) as { address?: Record<string, string> };
-    const countryCode = address.country_code?.toLowerCase();
-    // e.g. "US-CA" -> "CA"
-    const stateCode = address["ISO3166-2-lvl4"]?.split("-")[1];
-    return {
-      country: address.country,
-      countryCode,
-      region: countryCode === "us" ? stateCode : address.state,
-    };
-  } catch {
-    return {};
-  }
-}
-
+// State and country come from the coordinates, so the phone only has to send
+// city, lat and lon.
 export async function saveLocation(body: Record<string, unknown>) {
   const city = clean(body.city);
   const lat = Number(body.lat ?? body.latitude);
@@ -77,8 +46,7 @@ export async function saveLocation(body: Record<string, unknown>) {
   if (!city || !Number.isFinite(lat) || !Number.isFinite(lon)) {
     throw new Error("Send city, lat and lon.");
   }
-  // Rounded to ~1 km for the lookup; stored rounded to ~10 km.
-  const found = await lookupPlace(Math.round(lat * 100) / 100, Math.round(lon * 100) / 100);
+  const found = await lookupPlace(lat, lon);
   const loc: StoredLocation = {
     city,
     region: found.region ?? (clean(body.region ?? body.state) || undefined),

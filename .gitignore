@@ -43,3 +43,8 @@ next-env.d.ts
 
 # local widget data
 /.data
+
+# private full-size photos (contain exact GPS); they're uploaded to Vercel Blob
+/gallery-originals
+# local-dev stand-in for Blob
+/public/uploads

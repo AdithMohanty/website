@@ -1,6 +1,25 @@
 import Nav from "./Nav";
 import EntryBullets from "./EntryBullets";
+import type { Metadata } from "next";
 import CurrentLocation from "./CurrentLocation";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
+
+// Tells Google this site is about a person, and links the profiles that are also you.
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Adith Mohanty",
+  url: "https://adithmohanty.com",
+  affiliation: { "@type": "CollegeOrUniversity", name: "University of California, Berkeley" },
+  sameAs: [
+    "https://linkedin.com/in/adithmohanty",
+    "https://github.com/adithmohanty",
+    "https://www.instagram.com/adithjm/",
+  ],
+};
 
 type Tag = { label: string; href?: string };
 
@@ -24,7 +43,7 @@ const experience: EntryData[] = [
     url: "https://www.ibm.com/products/ibm-z-database-assistant",
     meta: "May – Aug 2026",
     sub: "Software Engineer Intern · San Jose, CA",
-    body: "Built an AI-driven system that benchmarks how LLM agents perform in production, tailored to the mainframe environment the product runs on.",
+    body: "Built an AI-driven system that benchmarks how LLM agents perform, tailored to the mainframe environment.",
     bullets: [
       "Built a distributed evaluation harness in Python running 30 concurrent multi-turn agent trajectories against IBM's ZDBA for DB2 at up to 6,000 questions/hour, cutting manual review from days to two hours.",
       "Designed a model-based grader on watsonx combining rubric-based scoring and pairwise comparison, with a reason-before-score contract and temperature-0 decoding for deterministic, reproducible scores.",
@@ -40,8 +59,8 @@ const experience: EntryData[] = [
     title: "DealMover.ai",
     url: "https://dealmover.ai/",
     meta: "Mar – May 2026",
-    sub: "Software Engineer · AI-native commercial underwriting",
-    body: "Worked on an AI-native platform for commercial underwriting: document ingestion, AI-assisted suggestions, and extraction of financial data.",
+    sub: "Software Engineer · San Francisco, CA",
+    body: "Worked on an AI-native platform for commercial underwriting which included document ingestion, AI-assisted suggestions, and extraction of financial data.",
     bullets: [
       "Built an LLM classification pipeline (Llama 3 via Ollama) that auto-sorts and tags uploaded lending documents using scope-aware prompts and a keyword fast-path, reducing GPU compute costs by 50%.",
       "Built a multi-agent extraction pipeline that parsed 200+ earnings reports and financial documents, populating 100+ structured fields per canonical schema at 95% accuracy.",
@@ -72,8 +91,8 @@ const experience: EntryData[] = [
     title: "Reyes Coca-Cola Bottling",
     url: "https://reyescocacola.com/our-brands",
     meta: "Dec 2024 – Mar 2025",
-    sub: "Machine Learning Engineer (Contract) · Berkeley, CA",
-    body: "Built sentiment-analysis models and a streaming pipeline to improve sales forecasting.",
+    sub: "Machine Learning Engineer · Berkeley, CA",
+    body: "Built sentiment-analysis models and a streaming pipeline to improve sales forecasting for 30+ products.",
     bullets: [
       "Developed sentiment models using VADER NLP, LDA topic modeling, and TF-IDF, trained on 10k+ consumer records scraped from X, Reddit, and Google via SerpApi.",
       "Cut forecast error (MAPE) by 20% with a streaming ETL pipeline (Kafka, AWS SQS) feeding live sentiment data into the forecasting model.",
@@ -201,6 +220,10 @@ function Entry({ e }: { e: EntryData }) {
 export default function Home() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd).replace(/</g, "\\u003c") }}
+      />
       <header className="hero">
         <Nav />
         <div className="hero-inner">
@@ -228,12 +251,12 @@ export default function Home() {
           AI products in infrastrucutre, finance, and developer tools.
         </p>
         <p>
-          I value environements where my work is used on day 1. Building systems that spark excitement or have use is why I build.
-          Most recently I was able to do this at IBM, building systems for LLM agent evals that uniquely run on production mainframe environments.
+          I value environements where my work is used on day 1. I build for the moment someone uses it, whether that's excitement or relief that a problem is gone.
+          Most recently, at IBM, I built LLM agent evals that run on mainframe environments, which cut agent review from days to hours and helped the team ship faster. 
         </p>
         <p>
-          I am currently exploring physical AI through classes (EECS 116, CS 188), projects (cool robot arm), and pulling all nighters in MuJoCo. I also led a VEX Robotics team to
-          the State and National Finals, and won both hardware and control awards at over 20+ competitions.
+          I'm currently exploring physical AI through classes (EECS 116, CS 188), building a robot arm, and pulling all nighters in MuJoCo. Robotics isn't new for me, though. I led a VEX Robotics team to
+          the State and National Finals and won awards for both hardware and control at 20+ competitions.
         </p>
         <CurrentLocation />
       </div>
