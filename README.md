@@ -1,3 +1,3 @@
 portfolio
 
-link: [adithmohanty.com] (adithmohanty.com)
+link: [adithmohanty.com](adithmohanty.com)
