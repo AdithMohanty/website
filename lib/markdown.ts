@@ -92,6 +92,11 @@ export function renderMarkdown(md: string) {
       para.push(lines[i++]);
     }
     const html = inline(para.join(" "));
+    // Two or more images on back-to-back lines sit side by side.
+    if (para.length > 1 && para.every((l) => /^!\[/.test(l.trim()))) {
+      out.push(`<div class="img-row">${html}</div>`);
+      continue;
+    }
     out.push(/^<(figure|img)[^]*>$/.test(html) ? html : `<p>${html}</p>`);
   }
 

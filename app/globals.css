@@ -755,6 +755,22 @@ a:hover {
   border: 1px solid var(--rule);
 }
 
+.prose .img-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.prose .img-row > * {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.prose .img-row img {
+  width: 100%;
+}
+
 .prose figcaption {
   margin-top: 8px;
   font-size: 13px;
