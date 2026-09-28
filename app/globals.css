@@ -668,6 +668,67 @@ a:hover {
   color: var(--body);
 }
 
+.tag-filter {
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.tag--active,
+.tag--active:hover {
+  color: var(--text-strong);
+  border-color: var(--chip-hover);
+}
+
+.post-tags {
+  flex-wrap: wrap;
+  margin: 10px 0 4px;
+}
+
+.post-actions {
+  margin: 4px 0 20px;
+}
+
+.like-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--chip-border);
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.like-button svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  transition: fill 0.2s ease, transform 0.2s ease;
+}
+
+.like-button:not(.like-button--liked):hover:not(:disabled) {
+  border-color: var(--chip-hover);
+  color: var(--text-strong);
+}
+
+.like-button--liked {
+  color: #f43f5e;
+  border-color: color-mix(in srgb, #f43f5e 45%, transparent);
+}
+
+.like-button--liked svg {
+  fill: currentColor;
+  transform: scale(1.1);
+}
+
+.like-button:disabled {
+  cursor: default;
+}
+
 .post-cover {
   display: block;
   width: 100%;

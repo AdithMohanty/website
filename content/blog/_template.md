@@ -3,6 +3,7 @@ title: Post title
 date: 2026-01-01
 summary: One line shown on the blog page.
 cover: /blog/cover.jpg
+tags: Pokemon, Tech
 ---
 
 How to write a post:
@@ -10,7 +11,8 @@ How to write a post:
 1. Copy this file into content/blog/ and rename it. The filename is the URL,
    so my-robot-arm.md shows up at /blog/my-robot-arm.
 2. Fill in the header above. Only title and date matter; delete summary or
-   cover if you don't need them.
+   cover if you don't need them. Tags are a comma-separated list (Pokemon,
+   Tech, Robotics, ...); each one becomes a filter on the blog page.
 3. Write the post below the header in Markdown.
 4. Images go in public/blog/ (make the folder if it isn't there) and are
    added like this:

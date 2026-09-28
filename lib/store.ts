@@ -7,7 +7,7 @@ const url = env("UPSTASH_REDIS_REST_URL", "KV_REST_API_URL");
 const token = env("UPSTASH_REDIS_REST_TOKEN", "KV_REST_API_TOKEN");
 const DATA_DIR = path.join(process.cwd(), ".data");
 
-async function redis(command: string[]) {
+async function redis<T = string | null>(command: string[]) {
   const res = await fetch(url!, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
@@ -15,7 +15,7 @@ async function redis(command: string[]) {
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`Upstash ${res.status}`);
-  return ((await res.json()) as { result: string | null }).result;
+  return ((await res.json()) as { result: T }).result;
 }
 
 export async function getValue<T>(key: string): Promise<T | null> {
@@ -41,4 +41,27 @@ export async function setValue(key: string, value: unknown) {
     await fs.mkdir(DATA_DIR, { recursive: true });
     await fs.writeFile(path.join(DATA_DIR, `${key}.json`), raw);
   }
+}
+
+// Sets of unique members (e.g. who liked a post). Adding the same member twice
+// is a no-op, which is what keeps one person from liking twice.
+export async function setHas(key: string, member: string) {
+  if (url && token) return (await redis<number>(["SISMEMBER", key, member])) === 1;
+  return ((await getValue<string[]>(key)) ?? []).includes(member);
+}
+
+export async function setSize(key: string) {
+  if (url && token) return (await redis<number>(["SCARD", key])) ?? 0;
+  return ((await getValue<string[]>(key)) ?? []).length;
+}
+
+export async function setToggle(key: string, member: string, on: boolean) {
+  if (url && token) {
+    await redis<number>([on ? "SADD" : "SREM", key, member]);
+    return;
+  }
+  const members = new Set((await getValue<string[]>(key)) ?? []);
+  if (on) members.add(member);
+  else members.delete(member);
+  await setValue(key, [...members]);
 }

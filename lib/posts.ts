@@ -10,6 +10,7 @@ export type Post = {
   date: string;
   summary: string;
   cover?: string;
+  tags: string[];
   body: string;
 };
 
@@ -42,8 +43,14 @@ function readPost(file: string): Post {
     date: meta.date || "",
     summary: meta.summary || "",
     cover: meta.cover || undefined,
+    // "tags: Pokemon, TCG" -> ["Pokemon", "TCG"]
+    tags: (meta.tags || "").replace(/^\[|\]$/g, "").split(",").map((t) => t.trim()).filter(Boolean),
     body,
   };
+}
+
+export function tagSlug(tag: string) {
+  return tag.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 function postFiles() {

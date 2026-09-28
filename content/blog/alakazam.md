@@ -2,6 +2,7 @@
 title: Alakazam: Don't get red carded
 date: 2026-09-26
 summary: A look at how I play Alakazam Toucannon, why each card is in the list, and what changes after rotation.
+tags: Pokemon
 ---
 
 Hi, my name is Adith, and I've been playing the Pokémon TCG for a few months now. I started collecting as a kid, took a break, and have since gotten back into both collecting and playing the card game. I play a lot of Pokémon TCG Live and reached an Elo of 1816 in the Pitch Black format.

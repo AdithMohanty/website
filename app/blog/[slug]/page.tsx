@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Nav from "../../Nav";
 import { formatDate, getPost, getPosts } from "@/lib/posts";
 import { renderMarkdown } from "@/lib/markdown";
+import LikeButton from "../LikeButton";
 
 export const dynamicParams = false;
 
@@ -43,6 +44,9 @@ export default async function PostPage({
         </Link>
         <h1 className="page-title">{post.title}</h1>
         {post.date && <p className="entry-sub">{formatDate(post.date)}</p>}
+        <div className="post-actions">
+          <LikeButton slug={post.slug} />
+        </div>
         {post.cover && (
           <img className="post-cover" src={post.cover} alt="" />
         )}
