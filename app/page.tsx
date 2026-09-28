@@ -108,7 +108,7 @@ const experience: EntryData[] = [
 const projects: EntryData[] = [
 {
     title: "Language-Driven Bimanual Robot Agent",
-    tags: [{ label: "github", href: "https://github.com/adithmohanty" }],
+    tags: [],
     sub: "Robot Learning · LLM Agents · Computer Vision",
     body: "A natural-language control system for the ALOHA 2 two-arm robot. A user types a command like \"put the red block in the bowl\" or \"open the jar\" and the two arms plan and carry it out together, with no task-specific programming or retraining.",
     bullets: [
@@ -135,6 +135,19 @@ const projects: EntryData[] = [
     ],
     image: "/media/arm.png",
     imageAlt: "MuJoCo simulation of the robot arm placing balls in the goal zone",
+  },
+  {
+    title: "FALCON: Autonomous Wildfire Detection & Mitigation",
+    tags: [{label: "paper", href: "https://www.younginventorsjournal.com/wp-content/uploads/2022/09/Ponnambalam-R.-et-al._Young-Inventors-Journal-2022_9-18-56591f40.pdf"}],
+    sub: "Embedded Systems · Computer Vision",
+    body: "The Fire Autonomous Location Containment Network, a fixed system for high-risk areas that spots wildfires early and starts fighting them within seconds, using water piped from nearby lakes and reservoirs instead of chemical suppressants. Published in the Young Inventors Journal with a team from Dublin Robotics.",
+    bullets: [
+      "Designed a zoned detection network of sensor towers, each carrying a 2MP visible/NIR camera and an uncooled microbolometer thermal sensor, feeding an AI detection engine that confirms a fire is real before anything activates.",
+      "Designed the suppression side: pump stations at natural water sources push water through copper pipelines to high-pressure sprinklers, and a central control tower opens only the valves for the affected zone. Pressure transmitters set the pump rate so water isn't wasted.",
+      "Built alerting into the control logic: confirmed fires trigger Wireless Emergency Alerts and an SOS to nearby fire stations with live footage, while sprinklers hold the fire back until crews arrive. A manual override lets people check or bypass the automated detection.",
+    ],
+    image: "/media/falcon.png",
+    imageAlt: "FALCON",
   },
   {
     title: "End-to-End Encrypted File Sharing",
@@ -214,6 +227,7 @@ const projects: EntryData[] = [
     image: "/media/byow.png",
     imageAlt: "Procedurally generated tile world from the BYOW game",
   },
+
 ];
 
 function Media({
