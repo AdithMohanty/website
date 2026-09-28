@@ -19,7 +19,21 @@ const newsreader = Newsreader({
 // What search results and link previews show. Change the text here.
 const title = "Adith Mohanty";
 const description =
-  "Portfolio of Adith Mohanty — Data Science and Applied Math at UC Berkeley.";
+  "Adith Mohanty — Data Science and Applied Math at UC Berkeley. Building AI products across infrastructure, finance, and developer tools; previously at IBM and Cisco.";
+
+// Structured data so search engines tie this site to the same person as the profiles below.
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: title,
+  url: "https://adithmohanty.com",
+  alumniOf: { "@type": "CollegeOrUniversity", name: "University of California, Berkeley" },
+  sameAs: [
+    "https://linkedin.com/in/adithmohanty",
+    "https://github.com/adithmohanty",
+    "https://www.instagram.com/adithjm/",
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://adithmohanty.com"),
@@ -48,6 +62,12 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(personJsonLd).replace(/</g, "\\u003c"),
+          }}
+        />
       </head>
       <body>
         {children}

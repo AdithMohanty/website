@@ -107,6 +107,18 @@ const experience: EntryData[] = [
 
 const projects: EntryData[] = [
   {
+    title: "RL in Simulation",
+    tags: [{ label: "github", href: "https://github.com/adithmohanty" }],
+    sub: "Python · Socket Programming · Distributed Systems",
+    body: "A distributed routing protocol built from scratch, mirroring the core mechanisms behind BGP and RIP.",
+    bullets: [
+      "Routers exchange advertisements and run Bellman-Ford to compute shortest-path forwarding tables across a multi-router network simulation.",
+      "Implemented loop prevention (split horizon, poison reverse) and convergence optimizations (triggered updates, route expiration) for fast, stable reconvergence after topology changes.",
+    ],
+    image: "/media/router.png",
+    imageAlt: "Network topology of the distance-vector router simulation",
+  },
+  {
     title: "Distance-Vector Router",
     tags: [{ label: "github", href: "https://github.com/adithmohanty" }],
     sub: "Python · Socket Programming · Distributed Systems",
@@ -248,10 +260,10 @@ export default function Home() {
       <div className="intro">
         <p>
           Hey! I like to make cool things and work on hard problems. I have worked across the stack building
-          AI products in infrastrucutre, finance, and developer tools.
+          AI products in infrastructure, finance, and developer tools.
         </p>
         <p>
-          I value environements where my work is used on day 1. I build for the moment someone uses it, whether that's excitement or relief that a problem is gone.
+          I value environments where my work is used on day 1. I build for the moment someone uses it, whether that's excitement or relief that a problem is gone.
           Most recently, at IBM, I built LLM agent evals that run on mainframe environments, which cut agent review from days to hours and helped the team ship faster. 
         </p>
         <p>
