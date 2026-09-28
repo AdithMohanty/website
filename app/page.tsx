@@ -106,10 +106,93 @@ const experience: EntryData[] = [
 ];
 
 const projects: EntryData[] = [
-  {
-    title: "RL in Simulation",
+{
+    title: "Language-Driven Bimanual Robot Agent",
     tags: [{ label: "github", href: "https://github.com/adithmohanty" }],
-    sub: "Python · Socket Programming · Distributed Systems",
+    sub: "Robot Learning · LLM Agents · Computer Vision",
+    body: "A natural-language control system for the ALOHA 2 two-arm robot. A user types a command like \"put the red block in the bowl\" or \"open the jar\" and the two arms plan and carry it out together, with no task-specific programming or retraining.",
+    bullets: [
+      "Built an LLM planning agent that turns open-ended instructions into calls to a library of single-arm and two-arm skills (pick, place, hand over, hold-and-twist, two-hand lift). It decides which arm does each step based on where objects are and what each arm can reach, and asks the user to clarify commands that are ambiguous or unsafe.",
+      "Grounded plans in the scene using ALOHA 2's four RGB-D cameras (overhead, low front and one on each wrist): Grounding DINO and SAM find and segment the objects named in the command, and depth plus camera calibration recover their 3D poses and grasp points, so the agent can handle objects it has never seen.",
+      "Implemented the skills on the MuJoCo Menagerie ALOHA 2 model (two 6-DOF ViperX 300 arms with parallel grippers), using inverse kinematics and collision-aware motion planning that keeps the arms from hitting each other, plus learned RL policies for contact-heavy steps like grasping and regrasping during handovers.",
+      "Added closed-loop execution: after each step a vision-language model checks the camera views to confirm it worked, and the agent retries or replans on failures like dropped objects, missed handovers or blocked paths.",
+      "Enforced safety below the LLM (workspace limits, arm-to-arm collision checks, joint speed and force caps, and an emergency stop), and evaluated the system on held-out instructions and objects against an ACT imitation-learning policy trained from teleoperated demos, measuring task success, recovery rate and time to finish.",
+    ],
+    image: "/media/agent.png",
+    imageAlt: "ALOHA 2 arms carrying out a natural-language command in MuJoCo",
+  },
+  {
+    title: "RL Arm Control",
+    tags: [{ label: "github", href: "https://github.com/adithmohanty/Robot-Arm-RL" }],
+    sub: "Reinforcement Learning · Robotics · Control Systems",
+    body: "A simulated robot arm built from scratch in MuJoCo that learns to pick up objects and place them in a goal zone through reinforcement learning, benchmarked against a classical control baseline.",
+    bullets: [
+      "Designed a custom Gymnasium environment around the MuJoCo simulation. The agent observes joint angles and speeds plus gripper and object positions, and controls joint torques, gripper lift and grip.",
+      "Engineered a shaped reward that breaks the task into stages (reach, grasp, lift, deliver), which gives the agent useful learning signal on a long pick-and-place task where success alone is rare.",
+      "Trained PPO and SAC agents in PyTorch using a curriculum that starts with reaching and builds up to full multi-object pick-and-place, tracking learning curves in TensorBoard.",
+      "Built a classical baseline with hand-derived forward and inverse kinematics for a 2-DOF arm and torque-limited PD joint controllers, and compared the learned policy against it on success rate, time to finish and motion smoothness.",
+      "Modeled the arm, gripper and scene in MuJoCo's XML format, and tuned the physics (integrator, friction model, contact settings) so objects stay in the gripper and the simulation is realistic enough to train on.",
+    ],
+    image: "/media/arm.png",
+    imageAlt: "MuJoCo simulation of the robot arm placing balls in the goal zone",
+  },
+  {
+    title: "End-to-End Encrypted File Sharing",
+    tags: [],
+    sub: "Applied Cryptography · Systems Security · Go · CS 161",
+    body: "A secure file storage and sharing client in Go, built to keep files confidential and tamper-proof even when the server storing them is fully controlled by an attacker.",
+    bullets: [
+      "Designed the full cryptographic protocol from scratch. Keys are derived from passwords with Argon2 and split into purpose-specific keys with HKDF. Every stored object is encrypted and then MACed (encrypt-then-MAC), and sharing invitations are protected with public-key encryption and digital signatures.",
+      "Supported user login across multiple devices with no local state, plus file store, load and append. Files are stored as a linked list of encrypted chunks, so appending only sends the new data instead of re-encrypting the whole file.",
+      "Built sharing as a tree of access grants. Revoking a user re-encrypts the file under new keys and moves it, which cuts off that user and everyone they shared with while every other user keeps access without noticing.",
+      "Wrote an adversarial test suite that tampers with, swaps, replays and deletes server data, checking that every attack is detected instead of silently producing wrong data.",
+    ],
+    image: "/media/e2ee.png",
+    imageAlt: "Data structure diagram of the encrypted file sharing design",
+  },
+    {
+    title: "Pac-Man AI Agents",
+    tags: [],
+    sub: "Artificial Intelligence · Search · Probabilistic Inference · RL · CS 188",
+    body: "A set of AI agents for Pac-Man covering the core techniques of classical AI, from search and game-playing to probabilistic tracking and reinforcement learning.",
+    bullets: [
+      "Implemented DFS, BFS, uniform-cost search and A*, and designed admissible, consistent heuristics for multi-goal problems like visiting every corner and eating all the food, which cut the number of nodes expanded.",
+      "Built adversarial agents using minimax, alpha-beta pruning and expectimax against multiple ghosts, plus a hand-designed evaluation function to play well at limited search depth.",
+      "Tracked invisible ghosts from noisy distance readings using hidden Markov models, with exact inference and particle filtering, including a joint particle filter for several ghosts at once.",
+      "Trained agents with value iteration, Q-learning and approximate Q-learning over hand-built features, and built neural networks from scratch for digit classification and language identification.",
+    ],
+    image: "/media/pacman.png",
+    imageAlt: "Pac-Man agent tracking ghosts with belief distributions",
+  },
+  {
+    title: "Memory Safety & Web Exploits",
+    tags: [],
+    sub: "Offensive Security · C · x86 · CS 161",
+    body: "Hands-on attacks against deliberately vulnerable programs and a web app, used to learn how real-world defenses fail and how to fix them.",
+    bullets: [
+      "Exploited C programs through stack buffer overflows, off-by-one errors, format string bugs and return-to-libc, getting around stack canaries, non-executable stacks and ASLR by reading memory layouts in GDB.",
+      "Attacked a web application with SQL injection, stored and reflected XSS, and CSRF, then described the fix for each: parameterized queries, output escaping, CSRF tokens and cookie flags.",
+    ],
+    image: "/media/exploits.png",
+    imageAlt: "GDB session showing a stack layout during an exploit",
+  },
+  {
+    title: "Machine Learning from Scratch",
+    tags: [],
+    sub: "Machine Learning · NumPy · PyTorch · CS 189",
+    body: "Core machine learning models implemented from first principles and tested on real datasets through Kaggle competitions.",
+    bullets: [
+      "Built a fully connected neural network and a CNN in pure NumPy, including forward and backward passes, weight initialization and optimizers, and checked the gradients numerically before rebuilding the models in PyTorch.",
+      "Implemented decision trees and random forests with entropy-based splits, and Gaussian discriminant analysis (LDA and QDA), and applied them to spam detection, Titanic survival and MNIST.",
+      "Trained SVMs with cross-validated hyperparameter search and feature engineering for spam and image classification, and submitted predictions to class Kaggle competitions.",
+    ],
+    image: "/media/ml.png",
+    imageAlt: "Training curves and decision boundaries from the ML models",
+  },
+    {
+    title: "Distance-Vector Router",
+    tags: [],
+    sub: "Socket Programming · Distributed Systems · Python · CS 168",
     body: "A distributed routing protocol built from scratch, mirroring the core mechanisms behind BGP and RIP.",
     bullets: [
       "Routers exchange advertisements and run Bellman-Ford to compute shortest-path forwarding tables across a multi-router network simulation.",
@@ -119,16 +202,17 @@ const projects: EntryData[] = [
     imageAlt: "Network topology of the distance-vector router simulation",
   },
   {
-    title: "Distance-Vector Router",
-    tags: [{ label: "github", href: "https://github.com/adithmohanty" }],
-    sub: "Python · Socket Programming · Distributed Systems",
-    body: "A distributed routing protocol built from scratch, mirroring the core mechanisms behind BGP and RIP.",
+    title: "Build Your Own World",
+    tags: [],
+    sub: "Data Structures · Procedural Generation · Java · CS 61B",
+    body: "A 2D tile-based exploration game in Java with worlds generated from a seed. The same seed always produces the same world.",
     bullets: [
-      "Routers exchange advertisements and run Bellman-Ford to compute shortest-path forwarding tables across a multi-router network simulation.",
-      "Implemented loop prevention (split horizon, poison reverse) and convergence optimizations (triggered updates, route expiration) for fast, stable reconvergence after topology changes.",
+      "Wrote a procedural generator that places non-overlapping rooms and connects them with hallways, using a seeded random number generator so any world can be rebuilt exactly from its seed.",
+      "Guaranteed every room is reachable by connecting rooms through a graph and checking connectivity with disjoint sets.",
+      "Built the interactive layer: keyboard movement, a HUD that describes the tile under the mouse, and save/load that replays the stored input history so a game resumes exactly where it left off.",
     ],
-    image: "/media/router.png",
-    imageAlt: "Network topology of the distance-vector router simulation",
+    image: "/media/byow.png",
+    imageAlt: "Procedurally generated tile world from the BYOW game",
   },
 ];
 
