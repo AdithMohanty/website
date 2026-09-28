@@ -108,7 +108,7 @@ const experience: EntryData[] = [
 const projects: EntryData[] = [
 {
     title: "Language-Driven Bimanual Robot Agent",
-    tags: [],
+    tags: [{label: "Ongoing"}],
     sub: "Robot Learning · LLM Agents · Computer Vision",
     body: "A natural-language control system for the ALOHA 2 two-arm robot. A user types a command like \"put the red block in the bowl\" or \"open the jar\" and the two arms plan and carry it out together, with no task-specific programming or retraining.",
     bullets: [
