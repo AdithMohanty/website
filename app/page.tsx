@@ -393,6 +393,8 @@ export default function Home() {
         <a href="https://github.com/adithmohanty">GitHub</a>
         <span className="sep">/</span>
         <a href="https://www.instagram.com/adithjm/?hl=en">Instagram</a>
+        <span className="sep">/</span>
+        <a href="/AdithMohantyResume.pdf" download="AdithMohantyResume.pdf">Resume</a>
             </p>
             </div>
         </div>
