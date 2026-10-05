@@ -107,23 +107,37 @@ const experience: EntryData[] = [
 
 const projects: EntryData[] = [
 {
-    title: "Language-Driven Bimanual Robot Agent",
-    tags: [{label: "ongoing"}],
-    sub: "Robot Learning · LLM Agents · Computer Vision",
-    body: "A natural-language control system for the ALOHA 2 two-arm robot. A user types a command like \"put the red block in the bowl\" or \"open the jar\" and the two arms plan and carry it out together, with no task-specific programming or retraining.",
+    title: "Fleet Middleware for Generalist Robots",
+    tags: [{ label: "ongoing" }, { label: "blog", href: "/blog/generalist-robot-policies" }],
+    sub: "Multi-Robot Systems · VLA(𝜋0.5) · LLM Planning(Qwen3.5-4B) · Scheduling",
+    body: "Middleware that sits between a person and a fleet of robots running generalist VLA policies. It takes advantage of the fact that VLAs work best on short, concrete instructions and that they provide a common interface for different robots. One time setup for a fleet allows you to plan, assignn and track work accross the fleet.", 
     bullets: [
-      "Built an LLM planning agent that turns open-ended instructions into calls to a library of single-arm and two-arm skills (pick, place, hand over, hold-and-twist, two-hand lift). It decides which arm does each step based on where objects are and what each arm can reach, and asks the user to clarify commands that are ambiguous or unsafe.",
-      "Grounded plans in the scene using ALOHA 2's four RGB-D cameras (overhead, low front and one on each wrist): Grounding DINO and SAM find and segment the objects named in the command, and depth plus camera calibration recover their 3D poses and grasp points, so the agent can handle objects it has never seen.",
-      "Implemented the skills on the MuJoCo Menagerie ALOHA 2 model (two 6-DOF ViperX 300 arms with parallel grippers), using inverse kinematics and collision-aware motion planning that keeps the arms from hitting each other, plus learned RL policies for contact-heavy steps like grasping and regrasping during handovers.",
-      "Added closed-loop execution: after each step a vision-language model checks the camera views to confirm it worked, and the agent retries or replans on failures like dropped objects, missed handovers or blocked paths.",
-      "Enforced safety below the LLM (workspace limits, arm-to-arm collision checks, joint speed and force caps, and an emergency stop), and evaluated the system on held-out instructions and objects against an ACT imitation-learning policy trained from teleoperated demos, measuring task success, recovery rate and time to finish.",
+      "Designed a robot registry where setup is done once per robot per fleet. The registry stores each robot's capabilities, location and VLA endpoint, which the planner and scheduler use to assign work.",
+      "Built an LLM planner that turns a goal like \"clean up the living room\" into a DAG(Directed Acyclic Graph) of small, single-robot steps. Planner only emits steps that match a capability some robot in the registry has.",
+      "Built a scheduler that assigns each ready step to a robot based on capability, location and what it is already doing, runs independent steps in parallel, and handles handoffs where one robot's output (a full basket) is another robot's input.",
+      "Each robot's VLA behind is wrapped in a common executor that sends it one language instruction at a time, watches progress through its cameras and robot state, and reports success or failure back so the planner can retry, reassign the step to another robot or replan.",
+      "Testing in a MuJoCo house scene with a bimanual ALOHA at a table sorting scattered objects into a basket, and a Unitree G1 humanoid that carries each full basket to a drop-off area and brings an empty one back. The middleware keeps both busy, so the ALOHA starts on the next basket while the G1 is still delivering the last one.",
+      "Building episode tracking and logging so the system can be used to collect data for training better generalist policies, and analyze the current policies' failure modes and bottlenecks.",
     ],
     image: "/media/agent.png",
-    imageAlt: "ALOHA 2 arms carrying out a natural-language command in MuJoCo",
+    imageAlt: "ALOHA arms sorting objects into a basket in a MuJoCo house scene",
   },
+  // {
+  //   title: "Robot Life: A VR Game That Collects Robot Training Data",
+  //   tags: [{ label: "ongoing" }],
+  //   sub: "Mixed Reality · Robot Data Collection · Teleoperation · Game Design",
+  //   body: "A mixed-reality game on Meta's Quest 3 where you play as a robot, and every quest you finish doubles as a labeled training episode for real robots. You don't need equipent and this way you can gain valuable data in bulk along with edge case scenarios.",
+  //   bullets: [
+  //     "Wrote the world as a parody to a Tesla Optimus with the ability to call Robotaxis, use Grok, and the goal which is to escape on to Mars on a Starship.",
+  //     "Built two robots, one with 2 arms and 7 DoF each and one based on a humanoid. Modeled the robots to make sure that their joint limits, reach and gripper are respected in the game, so the data collected is realistic for real robots.",
+  //     "Mapped the player's tracked hands and head onto the chosen robot's body, with its joint limits, reach and gripper applied in real time. The recorded motion is already in the robot's own action space instead of raw human motion that needs retargeting later.",
+  //     "Stage resets if you go past joint limits, drop an object, go out of bounds, not using the gripper correctly, or if the robot collides with itself or the environment. This ensures that the data collected is valid and useful for training.",
+  //   ],
+  //   imageAlt: "Robot Life VR game",
+  // },
   {
     title: "RL Arm Control",
-    tags: [{ label: "github", href: "https://github.com/adithmohanty/Robot-Arm-RL" }],
+    tags: [{ label: "github", href: "https://github.com/AdithMohanty/robot-arm-rl" }],
     sub: "Reinforcement Learning · Robotics · Control Systems",
     body: "A simulated robot arm built from scratch in MuJoCo that learns to pick up objects and place them in a goal zone through reinforcement learning, benchmarked against a classical control baseline.",
     bullets: [
@@ -365,8 +379,8 @@ export default function Home() {
           Most recently, at IBM, I built LLM agent evals that run on mainframe environments, which cut agent review from days to hours and helped the team ship faster. 
         </p>
         <p>
-          I'm currently exploring physical AI through classes (EECS 116, CS 188), building a robot arm, and pulling all nighters in MuJoCo. Robotics isn't new for me, though. I led a VEX Robotics team to
-          the State and National Finals and won awards for both hardware and control at 20+ competitions.
+          I'm currently exploring physical AI through classes (EECS 116, CS 188), <a href="#projects">projects</a>, and pulling all nighters in MuJoCo. Robotics isn't new for me, though. I led a VEX Robotics team to
+          the <a href="https://www.youtube.com/watch?v=DDMdYiVO75k">State</a> and <a href="https://youtu.be/0OnV3VFDlbg?si=lYBwgYalrfeDz3ol&t=234">National</a> Championships and won awards for both hardware and control at 20+ competitions.
         </p>
         <CurrentLocation />
       </div>

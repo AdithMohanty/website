@@ -11,9 +11,9 @@ export default function Nav() {
         <span className="sep">/</span>
         <Link href="/#projects">Projects</Link>
         <span className="sep">/</span>
-        <Link href="/blog">Blog</Link>
+        <Link href="/blog">Thoughts</Link>
         <span className="sep">/</span>
-        <Link href="/gallery">Gallery</Link>
+        <Link href="/gallery">Pics</Link>
       </div>
       <ThemeToggle />
     </nav>
