@@ -26,7 +26,8 @@ function subscribe(onChange: () => void) {
 }
 
 // Turns the grid's cursor trail rainbow. The grid reads data-rainbow on <html>,
-// which layout.tsx sets before paint from localStorage.
+// which layout.tsx sets before paint. Kept in sessionStorage: it survives a
+// reload but a new tab starts with it off.
 export default function RainbowToggle() {
   // null during server render, so the button stays hidden until we know.
   const on = useSyncExternalStore(
@@ -40,7 +41,7 @@ export default function RainbowToggle() {
     document.documentElement.toggleAttribute("data-rainbow", next);
     window.dispatchEvent(new Event("rainbowchange"));
     try {
-      localStorage.setItem("rainbow", next ? "on" : "off");
+      sessionStorage.setItem("rainbow", next ? "on" : "off");
     } catch {}
   };
 

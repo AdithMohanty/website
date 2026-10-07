@@ -3,7 +3,7 @@ import { Geist, Newsreader } from "next/font/google";
 import "./globals.css";
 import Grid from "./Grid";
 import NowPlaying from "./NowPlaying";
-const themeScript = `(function(){try{var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);if(localStorage.getItem('rainbow')==='on')document.documentElement.setAttribute('data-rainbow','');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
+const themeScript = `(function(){try{var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);if(sessionStorage.getItem('rainbow')==='on')document.documentElement.setAttribute('data-rainbow','');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
 
 const geistSans = Geist({
   variable: "--font-geist",
