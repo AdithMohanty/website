@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
+import RainbowToggle from "./RainbowToggle";
 
 export default function Nav() {
   return (
@@ -15,7 +16,10 @@ export default function Nav() {
         <span className="sep">/</span>
         <Link href="/gallery">Pics</Link>
       </div>
-      <ThemeToggle />
+      <div className="nav-actions">
+        <RainbowToggle />
+        <ThemeToggle />
+      </div>
     </nav>
   );
 }

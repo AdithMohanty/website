@@ -2,6 +2,8 @@ import Nav from "./Nav";
 import EntryBullets from "./EntryBullets";
 import type { Metadata } from "next";
 import CurrentLocation from "./CurrentLocation";
+import ModelViewer from "./ModelViewer";
+import MoreProjects from "./MoreProjects";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -33,8 +35,10 @@ type EntryData = {
   bullets?: string[];
   image?: string;
   imageAlt?: string;
+  model?: string; // .glb from `npm run models`; clicking the image opens it in 3D
   logo?: boolean;
   logoBg?: string;
+  highlight?: boolean; // projects: shown up front; the rest sit behind "Show more"
 };
 
 const experience: EntryData[] = [
@@ -108,8 +112,9 @@ const experience: EntryData[] = [
 const projects: EntryData[] = [
 {
     title: "Fleet Middleware for Generalist Robots",
+    highlight: true,
     tags: [{ label: "ongoing" }, { label: "blog", href: "/blog/generalist-robot-policies" }],
-    sub: "Multi-Robot Systems · VLA(𝜋0.5) · LLM Planning(Qwen3.5-4B) · Scheduling",
+    sub: "Multi-Robot Systems · VLAs(𝜋0.5) · LLM Planning(Qwen3.5-4B)",
     body: "Middleware that sits between a person and a fleet of robots running generalist VLA policies. It takes advantage of the fact that VLAs work best on short, concrete instructions and that they provide a common interface for different robots. One time setup for a fleet allows you to plan, assignn and track work accross the fleet.", 
     bullets: [
       "Designed a robot registry where setup is done once per robot per fleet. The registry stores each robot's capabilities, location and VLA endpoint, which the planner and scheduler use to assign work.",
@@ -137,6 +142,7 @@ const projects: EntryData[] = [
   // },
   {
     title: "RL Arm Control",
+    highlight: true,
     tags: [{ label: "github", href: "https://github.com/AdithMohanty/robot-arm-rl" }],
     sub: "Reinforcement Learning · Robotics · Control Systems",
     body: "A simulated robot arm built from scratch in MuJoCo that learns to pick up objects and place them in a goal zone through reinforcement learning, benchmarked against a classical control baseline.",
@@ -150,8 +156,19 @@ const projects: EntryData[] = [
     image: "/media/arm.png",
     imageAlt: "MuJoCo simulation of the robot arm placing balls in the goal zone",
   },
+    {
+    title: "Racket & Paddle Wall Mount",
+    highlight: true,
+    tags: [{ label: "download", href: "https://drive.google.com/drive/folders/1B3cZ6xzzx_m1YezyCewf2eChcIGYuWxC?usp=sharing" }],
+    sub: "CAD · Generative Design · 3D Printing",
+    body: "A wall mount that holds two tennis rackets and a pickleball paddle. I designed it in Fusion 360 with generative design in order to get the organic looking strucuture. The mount is printed with PLA. Click the image to look interact with the model or download the STLs to print it yourself.",
+    image: "/media/v8.webp",
+    imageAlt: "Racket and paddle wall mount, rendered from the 3D model",
+    model: "/models/v8-wall-mount.glb",
+  },
   {
     title: "FALCON: Autonomous Wildfire Detection & Mitigation",
+    highlight: true,
     tags: [{label: "paper", href: "https://www.younginventorsjournal.com/wp-content/uploads/2022/09/Ponnambalam-R.-et-al._Young-Inventors-Journal-2022_9-18-56591f40.pdf"}],
     sub: "Embedded Systems · Computer Vision",
     body: "The Fire Autonomous Location Containment Network, a fixed system for high-risk areas that spots wildfires early and starts fighting them within seconds, using water piped from nearby lakes and reservoirs instead of chemical suppressants. Published in the Young Inventors Journal with a team from Dublin Robotics.",
@@ -300,9 +317,16 @@ function ArrowIcon() {
 }
 
 function Entry({ e }: { e: EntryData }) {
+  const media = <Media src={e.image} alt={e.imageAlt} logo={e.logo} logoBg={e.logoBg} />;
   return (
     <article className="entry">
-      <Media src={e.image} alt={e.imageAlt} logo={e.logo} logoBg={e.logoBg} />
+      {e.model ? (
+        <ModelViewer src={e.model} title={e.title}>
+          {media}
+        </ModelViewer>
+      ) : (
+        media
+      )}
       <div className="entry-main">
         <div className="entry-head">
           <h2 className="entry-title">
@@ -340,6 +364,9 @@ function Entry({ e }: { e: EntryData }) {
     </article>
   );
 }
+
+const highlighted = projects.filter((p) => p.highlight);
+const others = projects.filter((p) => !p.highlight);
 
 export default function Home() {
   return (
@@ -409,9 +436,16 @@ export default function Home() {
 
       <p className="section-label" id="projects">Projects</p>
       <div className="rule" />
-      {projects.map((e) => (
+      {highlighted.map((e) => (
         <Entry key={e.title} e={e} />
       ))}
+      {others.length > 0 && (
+        <MoreProjects count={others.length}>
+          {others.map((e) => (
+            <Entry key={e.title} e={e} />
+          ))}
+        </MoreProjects>
+      )}
       </main>
     </>
   );

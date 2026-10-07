@@ -59,12 +59,29 @@ export default function Grid() {
       el.style.transform = `translate(${c.col * CELL_COL}px, ${c.row * CELL_ROW}px)`;
     }
 
-    function fadeOut(c: Cell) {
+    function randomColor() {
+      return `hsl(${Math.floor(Math.random() * 360)} 85% 60% / 0.55)`;
+    }
+
+    // With the rainbow toggle on, each hovered cell gets a random color (the
+    // same kind a click flashes); otherwise the CSS default glow applies.
+    function tint(el: HTMLElement) {
+      if (document.documentElement.hasAttribute("data-rainbow")) {
+        el.style.setProperty("--cell", randomColor());
+      } else {
+        el.style.removeProperty("--cell");
+      }
+    }
+
+    function fadeOut(c: Cell, color?: string) {
       const k = key(c.col, c.row);
       trails.get(k)?.remove();
       const el = document.createElement("div");
       el.className = "grid-trail";
       place(el, c);
+      // The cell leaving the cursor keeps its color as it fades.
+      if (color) el.style.setProperty("--cell", color);
+      else tint(el);
       el.addEventListener("animationend", () => {
         el.remove();
         if (trails.get(k) === el) trails.delete(k);
@@ -78,7 +95,7 @@ export default function Grid() {
       if (current && current.col === next.col && current.row === next.row) return;
 
       if (current) {
-        fadeOut(current);
+        fadeOut(current, hover!.style.getPropertyValue("--cell") || undefined);
         // Light the boxes skipped between the last cell and this one.
         for (const c of cellsBetween(current, next).slice(0, -1)) fadeOut(c);
       }
@@ -88,12 +105,13 @@ export default function Grid() {
       trails.delete(k);
 
       place(hover!, next);
+      tint(hover!);
       hover!.style.opacity = "1";
       current = next;
     }
 
     function handleMouseLeave() {
-      if (current) fadeOut(current);
+      if (current) fadeOut(current, hover!.style.getPropertyValue("--cell") || undefined);
       hover!.style.opacity = "0";
       current = null;
     }
@@ -111,7 +129,7 @@ export default function Grid() {
       if (interactive) return;
       const el = document.createElement("div");
       el.className = "grid-flash";
-      el.style.background = `hsl(${Math.floor(Math.random() * 360)} 85% 60% / 0.55)`;
+      el.style.background = randomColor();
       place(el, cellAt(e.clientX, e.clientY));
       el.addEventListener("animationend", () => el.remove());
       flashLayer!.appendChild(el);
