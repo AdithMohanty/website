@@ -33,6 +33,7 @@ export async function POST(req: Request) {
     revalidatePath("/gallery");
     return Response.json({ ok: true, place: photo.place ?? null, date: photo.date ?? null, src: photo.src });
   } catch (e) {
+    console.error("Gallery upload failed:", e);
     return Response.json({ error: (e as Error).message }, { status: 500 });
   }
 }

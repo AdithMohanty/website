@@ -43,8 +43,20 @@ export async function addPhoto(input: Buffer, hints: Hints = {}): Promise<Photo>
   const lon = toNumber(hints.lon) ?? toNumber(exif?.longitude);
   const place = lat !== undefined && lon !== undefined ? placeName(await lookupPlace(lat, lon)) : "";
 
+  // iPhone photos are often HEIC, which sharp's prebuilt binaries can read the
+  // header of but not decode; heic-decode does that part.
+  let image = sharp(input);
+  const meta = await image.metadata().catch(() => null);
+  if (meta?.format === "heif" && meta.compression === "hevc") {
+    const { default: decode } = await import("heic-decode");
+    const { width, height, data } = await decode({ buffer: input });
+    image = sharp(Buffer.from(data.buffer, data.byteOffset, data.byteLength), {
+      raw: { width, height, channels: 4 },
+    });
+  }
+
   // .rotate() applies the EXIF orientation; sharp drops all metadata (GPS included).
-  const { data, info } = await sharp(input)
+  const { data, info } = await image
     .rotate()
     .resize(MAX_SIZE, MAX_SIZE, { fit: "inside", withoutEnlargement: true })
     .jpeg({ quality: 82, mozjpeg: true })
