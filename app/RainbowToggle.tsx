@@ -25,21 +25,16 @@ function subscribe(onChange: () => void) {
   return () => window.removeEventListener("rainbowchange", onChange);
 }
 
-// Whether rainbow mode is on: null during server render, until we know.
-export function useRainbow() {
-  return useSyncExternalStore(
-    subscribe,
-    () => document.documentElement.hasAttribute("data-rainbow"),
-    () => null
-  );
-}
-
 // Turns the grid's cursor trail rainbow. The grid reads data-rainbow on <html>,
 // which layout.tsx sets before paint. Kept in sessionStorage: it survives a
 // reload but a new tab starts with it off.
 export default function RainbowToggle() {
   // null during server render, so the button stays hidden until we know.
-  const on = useRainbow();
+  const on = useSyncExternalStore(
+    subscribe,
+    () => document.documentElement.hasAttribute("data-rainbow"),
+    () => null
+  );
 
   const toggle = () => {
     const next = !on;

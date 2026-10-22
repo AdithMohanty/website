@@ -302,10 +302,11 @@ a:hover {
   --wash: color-mix(in srgb, var(--link) 9%, var(--bg));
   --wash-hover: color-mix(in srgb, var(--link) 14%, var(--bg));
   --wash-border: color-mix(in srgb, var(--link) 14%, var(--bg));
-  --box-width: min(320px, calc(100vw - 32px));
+  /* One set width while playing, whatever the song; long text cycles instead. */
+  --box-width: min(280px, calc(100vw - 32px));
   position: fixed;
-  left: 16px;
-  bottom: 16px;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: max(16px, env(safe-area-inset-bottom));
   z-index: 40;
 }
 
@@ -318,10 +319,22 @@ a:hover {
   transition: transform 0.45s var(--spring-soft);
 }
 
-.spotify-lift:has(.spotify-card:hover),
 .spotify-lift:has(.spotify-card:focus-visible) {
   transform: translateY(calc(-1 * var(--lift)));
   transition: transform 0.6s var(--spring);
+}
+
+/* Lift on hover only where there's a real pointer; on touch it would stick. */
+@media (hover: hover) {
+  .spotify-lift:has(.spotify-card:hover) {
+    transform: translateY(calc(-1 * var(--lift)));
+    transition: transform 0.6s var(--spring);
+  }
+
+  .spotify-card:hover {
+    background: var(--wash-hover);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+  }
 }
 
 .spotify-card {
@@ -329,7 +342,7 @@ a:hover {
   display: flex;
   align-items: center;
   height: 50px;
-  max-width: 50px;
+  width: 50px;
   overflow: hidden;
   /* A soft wash of the site's link blue. */
   border: 1px solid var(--wash-border);
@@ -337,22 +350,21 @@ a:hover {
   background: var(--wash);
   color: var(--text-strong);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-  transition: max-width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.2s ease,
+  transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.2s ease,
     box-shadow 0.4s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .spotify-card:hover {
   text-decoration: none;
-  background: var(--wash-hover);
 }
 
-.spotify-card:hover,
 .spotify-card:focus-visible {
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
 }
 
 .spotify.is-playing .spotify-card {
-  max-width: var(--box-width);
+  width: var(--box-width);
 }
 
 .spotify-square {
@@ -390,6 +402,7 @@ a:hover {
 
 .spotify-details {
   display: flex;
+  flex: 1;
   flex-direction: column;
   min-width: 0;
   padding: 0 12px 0 4px;
@@ -404,39 +417,48 @@ a:hover {
   transition-delay: 0.15s;
 }
 
-.spotify-title,
-.spotify-artist {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .spotify-title {
   font-size: 14px;
   font-weight: 500;
   color: var(--heading);
 }
 
-.spotify-title > span {
-  display: inline-block;
+/* Text that cycles when it's too long: two copies side by side, sliding one
+   copy's width per loop, with a pause at the start of each. */
+.cycle {
+  display: block;
+  overflow: hidden;
 }
 
-/* Titles too long for the card scroll across on hover, then back. */
-.spotify-card:hover .spotify-title.is-long {
-  text-overflow: clip;
+.cycle-track {
+  display: inline-flex;
+  gap: 32px;
 }
 
-.spotify-card:hover .spotify-title.is-long > span {
-  animation: spotify-marquee calc(1s + var(--overflow) / 30px * 1s) ease-in-out 0.3s infinite alternate;
+.cycle-text + .cycle-text {
+  display: none;
 }
 
-@keyframes spotify-marquee {
+.cycle.is-cycling {
+  /* Soft edges, so the text slides in and out rather than being cut. */
+  mask-image: linear-gradient(90deg, transparent, #000 6px, #000 calc(100% - 14px), transparent);
+}
+
+.cycle.is-cycling .cycle-text + .cycle-text {
+  display: inline;
+}
+
+.cycle.is-cycling .cycle-track {
+  animation: cycle var(--cycle) linear 1s infinite;
+}
+
+@keyframes cycle {
   0%,
-  15% {
+  20% {
     transform: none;
   }
-  85%,
   100% {
-    transform: translateX(calc(-1 * var(--overflow)));
+    transform: translateX(calc(-1 * var(--shift)));
   }
 }
 
@@ -524,216 +546,55 @@ a:hover {
   }
 }
 
-/* ── Listen-along player: Spotify's embed, docked bottom right in the visualizer ── */
-.listen {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  /* Above the visualizer too. */
-  z-index: 110;
-  width: min(340px, calc(100vw - 32px));
-  padding: 8px;
-  border: 1px solid color-mix(in srgb, var(--link) 18%, transparent);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
-  animation: listen-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-.listen-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 0 2px 6px 4px;
-}
-
-.listen-note {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  min-width: 0;
-  font-size: 12px;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.listen-login {
-  flex-shrink: 0;
-  margin-left: auto;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: #1ed760;
-  color: #000;
-  font-size: 11.5px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.listen-login:hover {
-  text-decoration: none;
-  filter: brightness(1.08);
-}
-
-.listen-close {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.listen-close:hover {
-  background: color-mix(in srgb, var(--link) 12%, transparent);
-  color: var(--heading);
-}
-
-.listen-close svg {
-  width: 14px;
-  height: 14px;
-}
-
-.listen-player {
-  height: 80px;
-  overflow: hidden;
-  border-radius: 12px;
-}
-
-.listen-player iframe {
-  display: block;
-  border: 0;
-}
-
-@keyframes listen-in {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.96);
-  }
-}
-
-/* Small screens: above the song panel instead of beside it. */
-@media (max-width: 720px) {
-  .listen {
-    bottom: 104px;
-  }
-}
-
-/* ── Disco ball easter egg: rainbow mode while a song plays ── */
-.disco {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  animation: disco-pop 0.7s var(--spring) both;
-}
-
-.disco:hover {
-  text-decoration: none;
-}
-
-.disco-ball {
-  width: 40px;
-  height: 40px;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
-  animation: disco-bob 2.6s ease-in-out infinite alternate;
-  transition: filter 0.3s ease, scale 0.4s var(--spring);
-}
-
-.disco:hover .disco-ball,
-.disco:focus-visible .disco-ball {
-  scale: 1.12;
-  filter: drop-shadow(0 0 6px rgba(255, 95, 162, 0.7)) drop-shadow(0 0 14px rgba(95, 168, 255, 0.6));
-}
-
-/* Little four-pointed glints that twinkle around the ball. */
-.disco-sparkle {
-  position: absolute;
-  width: 9px;
-  height: 9px;
-  background: #fff;
-  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
-  pointer-events: none;
-  animation: disco-twinkle 1.8s ease-in-out infinite;
-}
-
-.disco-sparkle:nth-of-type(1) {
-  top: 0;
-  right: 0;
-  background: #ffe066;
-}
-
-.disco-sparkle:nth-of-type(2) {
-  bottom: 4px;
-  left: -2px;
-  width: 7px;
-  height: 7px;
-  background: #5fa8ff;
-  animation-delay: -0.6s;
-}
-
-.disco-sparkle:nth-of-type(3) {
-  top: 6px;
-  left: 2px;
-  width: 6px;
-  height: 6px;
-  background: #ff5f5f;
-  animation-delay: -1.2s;
-}
-
-@keyframes disco-pop {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.2) rotate(-40deg);
-  }
-}
-
-@keyframes disco-bob {
-  from {
-    transform: translateY(-2px) rotate(-5deg);
-  }
-  to {
-    transform: translateY(2px) rotate(5deg);
-  }
-}
-
-@keyframes disco-twinkle {
-  0%,
-  100% {
-    opacity: 0;
-    transform: scale(0.3) rotate(0deg);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1) rotate(45deg);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .spotify-lift {
     transition-timing-function: ease;
   }
 
-  .spotify-card:hover .spotify-title.is-long > span,
-  .listen,
-  .disco,
-  .disco-ball,
-  .disco-sparkle {
+  .cycle.is-cycling .cycle-track {
     animation: none;
   }
 
   .spotify-bars.is-live i {
     animation: none;
     transform: scaleY(0.6);
+  }
+}
+
+/* Phones: a little tighter to the corner and a little more compact. */
+@media (max-width: 640px) {
+  .spotify {
+    --box-width: min(260px, calc(100vw - 24px));
+    left: max(12px, env(safe-area-inset-left));
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .spotify-card {
+    height: 46px;
+    width: 46px;
+  }
+
+  .spotify-square {
+    width: 44px;
+    height: 44px;
+  }
+
+  .spotify-square img {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+  }
+
+  .spotify-title {
+    font-size: 13.5px;
+  }
+
+  .spotify-artist {
+    font-size: 12px;
+  }
+
+  .spotify-card .spotify-bars {
+    margin-right: 14px;
   }
 }
 
@@ -1524,326 +1385,137 @@ a:hover {
   }
 }
 
-/* ── Visualizer ── */
-/* Always dark: it's a light show, whatever the site theme. */
-.viz {
-  --viz-text: #ececf1;
-  --viz-soft: rgba(236, 236, 241, 0.72);
-  --viz-faint: rgba(236, 236, 241, 0.5);
-  --viz-glass: rgba(8, 9, 16, 0.42);
-  --viz-line: rgba(255, 255, 255, 0.1);
-  --viz-fill: rgba(255, 255, 255, 0.08);
-  --viz-fill-hover: rgba(255, 255, 255, 0.15);
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  overflow: hidden;
-  background: #05060c;
-  color: var(--viz-text);
-  color-scheme: dark;
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.viz.is-idle {
-  cursor: none;
-}
-
-.viz-canvas {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.viz-fallback {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  text-align: center;
-  color: var(--viz-soft);
-}
-
-.viz-ui {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  transition: opacity 0.6s ease;
-}
-
-.viz.is-idle .viz-ui {
-  opacity: 0;
-}
-
-.viz-top,
-.viz-bottom {
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.viz-top {
-  top: 16px;
-  align-items: flex-start;
-}
-
-.viz-bottom {
-  bottom: 16px;
-  align-items: flex-end;
-}
-
-.viz-panel {
-  pointer-events: auto;
-  border: 1px solid var(--viz-line);
-  border-radius: 12px;
-  background: var(--viz-glass);
-  -webkit-backdrop-filter: blur(16px) saturate(1.3);
-  backdrop-filter: blur(16px) saturate(1.3);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-}
-
-.viz.is-idle .viz-panel {
-  pointer-events: none;
-}
-
-.viz a {
-  color: inherit;
-}
-
-.viz-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 14px 0 12px;
-  color: var(--viz-text);
-}
-
-.viz-back:hover,
-.viz-track:hover {
-  text-decoration: none;
-  background: rgba(8, 9, 16, 0.6);
-}
-
-.viz-controls {
-  width: 260px;
-  padding: 6px;
-}
-
-.viz-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.viz-segment {
-  flex: 1;
-  display: flex;
-  padding: 2px;
-  border-radius: 8px;
-  background: var(--viz-fill);
-}
-
-.viz-segment button {
-  flex: 1;
-  height: 28px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--viz-soft);
-  font: inherit;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.viz-segment button[aria-pressed="true"] {
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
-}
-
-.viz-segment button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.viz-icon-btn {
-  height: 32px;
-  border: 1px solid var(--viz-line);
-  border-radius: 8px;
-  background: var(--viz-fill);
-  color: inherit;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  flex-shrink: 0;
-}
-
-.viz-icon-btn:hover {
-  background: var(--viz-fill-hover);
-}
-
-.viz-icon-btn[aria-pressed="true"] {
-  background: rgba(255, 255, 255, 0.22);
-  border-color: rgba(255, 255, 255, 0.4);
-  color: #fff;
-}
-
-.viz-icon-btn svg {
-  width: 16px;
-  height: 16px;
-}
-
-.viz-icon-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.viz-track {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  max-width: min(420px, 100%);
-  padding: 8px 18px 8px 8px;
-  color: var(--viz-text);
-}
-
-.viz-track img {
-  flex-shrink: 0;
-  width: 56px;
-  height: 56px;
-  border-radius: 6px;
-  object-fit: cover;
-}
-
-.viz-track-text {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-  line-height: 1.3;
-}
-
-.viz-track-label {
-  font-size: 10.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--viz-faint);
-}
-
-.viz-track-title,
-.viz-track-artist {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.viz-track-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: #fff;
-}
-
-.viz-track-artist {
-  color: var(--viz-soft);
-}
-
-.viz-track-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 4px;
-  font-size: 11.5px;
-  font-variant-numeric: tabular-nums;
-  color: var(--viz-faint);
-}
-
-/* Lights up 1-2-3-4 through each bar: they should flash with the kicks you hear. */
-.viz-beats {
-  display: inline-flex;
-  gap: 4px;
-}
-
-.viz-beats i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.18);
-  transition: background-color 0.25s ease, transform 0.25s ease;
-}
-
-.viz-beats i.is-on {
-  background: #fff;
-  transform: scale(1.35);
-  transition: none;
-}
-
-.viz-beats i:first-child.is-on {
-  background: #9cc3ff;
-}
-
-.viz-progress {
-  display: block;
-  height: 2px;
-  margin-top: 6px;
-  overflow: hidden;
-  border-radius: 1px;
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.viz-progress i {
-  display: block;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.7);
-  transform-origin: left;
-  transform: scaleX(0);
-}
-
-.viz-track-empty {
-  padding: 12px 16px;
-  color: var(--viz-soft);
-}
-
-.viz-keys {
-  flex-shrink: 0;
-  font-size: 12px;
-  color: var(--viz-faint);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
-}
-
-@media (hover: none), (max-width: 640px) {
-  .viz-keys {
-    display: none;
-  }
-}
-
-/* The listen-along player sits where the key hints were. */
-.viz.has-player .viz-keys {
-  visibility: hidden;
-}
-
-@media (max-width: 640px) {
-  .viz-controls {
-    width: auto;
-  }
-}
-
 /* ── Mobile ── */
 @media (max-width: 640px) {
+  body {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .nav,
+  .hero-inner,
+  .page-body {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  /* Nav: the toggles sit top right, the links on one line beneath. */
+  .nav {
+    flex-wrap: wrap;
+    row-gap: 10px;
+    padding-top: 20px;
+  }
+
+  .nav-actions {
+    order: 1;
+    margin-left: auto;
+  }
+
+  .nav-links {
+    order: 2;
+    width: 100%;
+    flex-wrap: nowrap;
+    font-size: 14px;
+  }
+
+  .nav-links .sep {
+    padding: 0 6px;
+  }
+
+  .name {
+    font-size: 32px;
+  }
+
+  .tagline {
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  .intro p {
+    margin-bottom: 16px;
+  }
+
+  .links {
+    margin-top: 20px;
+    font-size: 14px;
+  }
+
+  .links .sep {
+    padding: 0 6px;
+  }
+
+  .section-label {
+    margin: 48px 0 14px;
+  }
+
+  .rule {
+    margin-bottom: 28px;
+  }
+
+  /* Entries: a small thumbnail beside the title and role, then the
+     description full width below, so the words come first. */
   .entry {
-    flex-direction: column;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 0 14px;
+    align-items: start;
+    margin-bottom: 36px;
+  }
+
+  .entry > .entry-media,
+  .entry > .entry-media-button {
+    grid-row: 1 / span 2;
   }
 
   .entry-media {
-    width: 140px;
+    width: 64px;
+    border-radius: 8px;
+  }
+
+  .entry-media--logo img {
+    padding: 4px 6px;
+  }
+
+  .entry-media-badge {
+    right: 3px;
+    bottom: 3px;
+    font-size: 9px;
+    padding: 1px 5px;
+  }
+
+  .entry-main {
+    display: contents;
+  }
+
+  .entry-head,
+  .entry-sub {
+    grid-column: 2;
+  }
+
+  .entry-main > :not(.entry-head):not(.entry-sub) {
+    grid-column: 1 / -1;
+  }
+
+  .entry-head {
+    gap: 2px 10px;
+  }
+
+  .entry-title {
+    font-size: 15.5px;
+    line-height: 1.35;
+  }
+
+  .entry-meta {
+    font-size: 12px;
+  }
+
+  .entry-sub {
+    font-size: 13px;
+    margin: 2px 0 0;
+  }
+
+  .entry-body {
+    font-size: 14px;
+    margin-top: 12px;
   }
 }

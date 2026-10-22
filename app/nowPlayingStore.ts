@@ -1,7 +1,7 @@
-import { useEffect, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import type { NowPlaying } from "@/lib/spotify";
 
-// One poller shared by the corner box and the visualizer.
+// One shared poller for the corner box.
 
 export type Track = Extract<NowPlaying, { playing: true }>;
 export type NowPlayingState = {
@@ -11,11 +11,17 @@ export type NowPlayingState = {
 };
 
 export const FALLBACK_PROFILE = "https://open.spotify.com";
-const SLOW_MS = 30_000;
-// While the visualizer is open.
-const FAST_MS = 3_000;
-// Spotify can't push changes, so also check just after the song should end.
-const END_GRACE_MS = 1_500;
+// Every visitor runs this, so it checks rarely: about once a song. The card
+// only needs to be roughly right, and the progress bar runs on its own between
+// checks.
+const CHECK_MS = 3 * 60_000;
+// If the song should end before the next check, check just after it ends
+// instead (that replaces the check, it doesn't add one), but never sooner
+// than this, so a stuck position can't cause a burst.
+const END_GRACE_MS = 2_000;
+const MIN_WAIT_MS = 30_000;
+// Coming back to the tab only rechecks if the last check is older than this.
+const STALE_MS = CHECK_MS;
 
 const initial: NowPlayingState = { data: null, last: null };
 let state = initial;
@@ -23,7 +29,6 @@ const listeners = new Set<() => void>();
 let started = false;
 let loading = false;
 let lastLoad = 0;
-let fastWatchers = 0;
 let timer: ReturnType<typeof setTimeout> | undefined;
 
 function set(next: Partial<NowPlayingState>) {
@@ -72,8 +77,8 @@ async function load() {
 function schedule() {
   clearTimeout(timer);
   const d = state.data;
-  let wait = fastWatchers > 0 ? FAST_MS : SLOW_MS;
-  if (d?.playing) wait = Math.min(wait, Math.max(1_000, d.durationMs - positionNow(d) + END_GRACE_MS));
+  let wait = CHECK_MS;
+  if (d?.playing) wait = Math.min(wait, Math.max(MIN_WAIT_MS, d.durationMs - positionNow(d) + END_GRACE_MS));
   timer = setTimeout(tick, wait);
 }
 
@@ -84,7 +89,7 @@ function tick() {
 }
 
 function onVisible() {
-  if (!document.hidden && Date.now() - lastLoad > 2_000) void load();
+  if (!document.hidden && Date.now() - lastLoad > STALE_MS) void load();
 }
 
 function subscribe(onChange: () => void) {
@@ -101,17 +106,4 @@ function subscribe(onChange: () => void) {
 
 export function useNowPlaying() {
   return useSyncExternalStore(subscribe, () => state, () => initial);
-}
-
-// Polls quickly while the calling component is mounted.
-export function useFastUpdates() {
-  useEffect(() => {
-    fastWatchers++;
-    if (Date.now() - lastLoad > FAST_MS) void load();
-    else if (!loading) schedule();
-    return () => {
-      fastWatchers--;
-      if (!loading) schedule();
-    };
-  }, []);
 }
