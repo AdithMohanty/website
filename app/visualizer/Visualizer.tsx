@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from "react";
 import ListenAlong from "../ListenAlong";
-import { heardPosition, toggleListening, useListenAlong } from "../listenStore";
+import { heardPosition, setListenStatus, toggleListening, useListenAlong } from "../listenStore";
 import { positionNow, useFastUpdates, useNowPlaying, type Track } from "../nowPlayingStore";
 import { DEFAULT_PALETTE, loadCover, moodHue } from "./palette";
 import { analyzePreview, genericProfile, type SongProfile } from "./profile";
@@ -283,6 +283,15 @@ export default function Visualizer() {
     const handler = (e: KeyboardEvent) => onKey(e);
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  // Back from logging in to Spotify (see api/spotify-login): pick listening back up.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("listen")) return;
+    url.searchParams.delete("listen");
+    window.history.replaceState(null, "", url);
+    setListenStatus("starting");
   }, []);
 
   // Fade the controls and cursor out when the mouse rests.

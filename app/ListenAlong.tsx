@@ -56,7 +56,7 @@ function loadApi() {
 const NOTES: Record<Exclude<ListenStatus, "off">, string> = {
   starting: "Joining…",
   playing: "Listening along",
-  preview: "Preview · log in to Spotify for full songs",
+  preview: "Preview only",
   paused: "Press play to listen along",
   waiting: "Waiting for the next song",
   unavailable: "Spotify's player couldn't load",
@@ -196,6 +196,12 @@ export default function ListenAlong() {
           </span>
           {NOTES[status]}
         </span>
+        {status === "preview" && (
+          // Through Spotify's login and back here, listening along again.
+          <a className="listen-login" href="/api/spotify-login">
+            Log in for full songs
+          </a>
+        )}
         <button type="button" className="listen-close" onClick={toggleListening} aria-label="Stop listening along">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden="true">
             <path d="M6 6l12 12M18 6 6 18" />

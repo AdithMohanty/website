@@ -561,6 +561,23 @@ a:hover {
   text-overflow: ellipsis;
 }
 
+.listen-login {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #1ed760;
+  color: #000;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.listen-login:hover {
+  text-decoration: none;
+  filter: brightness(1.08);
+}
+
 .listen-close {
   display: grid;
   place-items: center;
