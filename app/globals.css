@@ -290,57 +290,110 @@ a:hover {
 
 /* ── Spotify corner box ── */
 .spotify {
+  /* Damped springs sampled into linear(): a bouncy lift and a softer settle. */
+  --spring: linear(0, 0.053, 0.183, 0.353, 0.532, 0.7, 0.844, 0.957, 1.038, 1.089, 1.115, 1.121,
+    1.113, 1.096, 1.075, 1.054, 1.034, 1.017, 1.004, 0.994, 0.989, 0.986, 0.985, 0.987, 0.989,
+    0.991, 0.994, 0.996, 1);
+  --spring-soft: linear(0, 0.032, 0.113, 0.22, 0.34, 0.461, 0.575, 0.678, 0.766, 0.84, 0.9, 0.946,
+    0.98, 1.005, 1.021, 1.03, 1.035, 1.036, 1.035, 1.031, 1.027, 1.023, 1.019, 1.015, 1.011, 1.008,
+    1.005, 1.003, 1);
+  /* How far the card rises on hover. */
+  --lift: 3px;
+  --wash: color-mix(in srgb, var(--link) 9%, var(--bg));
+  --wash-hover: color-mix(in srgb, var(--link) 14%, var(--bg));
+  --wash-border: color-mix(in srgb, var(--link) 14%, var(--bg));
+  --box-width: min(320px, calc(100vw - 32px));
   position: fixed;
   left: 16px;
   bottom: 16px;
   z-index: 40;
+}
+
+.spotify-lift {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  height: 52px;
-  max-width: 52px;
+  gap: 10px;
+  transition: transform 0.45s var(--spring-soft);
+}
+
+.spotify-lift:has(.spotify-card:hover),
+.spotify-lift:has(.spotify-card:focus-visible) {
+  transform: translateY(calc(-1 * var(--lift)));
+  transition: transform 0.6s var(--spring);
+}
+
+.spotify-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 50px;
+  max-width: 50px;
   overflow: hidden;
   /* A soft wash of the site's link blue. */
-  border: 1px solid color-mix(in srgb, var(--link) 14%, var(--bg));
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--link) 9%, var(--bg));
+  border: 1px solid var(--wash-border);
+  border-radius: 12px;
+  background: var(--wash);
   color: var(--text-strong);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-  transition: max-width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s ease,
-    transform 0.2s ease;
+  transition: max-width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.2s ease,
+    box-shadow 0.4s ease;
 }
 
-.spotify:hover {
+.spotify-card:hover {
   text-decoration: none;
-  background: color-mix(in srgb, var(--link) 13%, var(--bg));
-  transform: translateY(-2px);
+  background: var(--wash-hover);
 }
 
-.spotify.is-playing {
-  max-width: min(320px, calc(100vw - 32px));
+.spotify-card:hover,
+.spotify-card:focus-visible {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+}
+
+.spotify.is-playing .spotify-card {
+  max-width: var(--box-width);
 }
 
 .spotify-square {
   flex-shrink: 0;
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .spotify-square img {
-  width: 40px;
-  height: 40px;
-  border-radius: 3px;
+  width: 36px;
+  height: 36px;
+  border-radius: 7px;
   object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  animation: spotify-cover 0.5s ease both;
+}
+
+@keyframes spotify-cover {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+/* Nothing playing: a note in the square instead of a cover. */
+.spotify-square svg {
+  width: 18px;
+  height: 18px;
+  color: var(--link);
+  opacity: 0.8;
 }
 
 .spotify-details {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding: 0 16px 0 2px;
-  line-height: 1.3;
+  padding: 0 12px 0 4px;
+  line-height: 1.35;
   white-space: nowrap;
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -349,13 +402,6 @@ a:hover {
 .spotify.is-playing .spotify-details {
   opacity: 1;
   transition-delay: 0.15s;
-}
-
-.spotify-label {
-  font-size: 10.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--label);
 }
 
 .spotify-title,
@@ -370,9 +416,308 @@ a:hover {
   color: var(--heading);
 }
 
+.spotify-title > span {
+  display: inline-block;
+}
+
+/* Titles too long for the card scroll across on hover, then back. */
+.spotify-card:hover .spotify-title.is-long {
+  text-overflow: clip;
+}
+
+.spotify-card:hover .spotify-title.is-long > span {
+  animation: spotify-marquee calc(1s + var(--overflow) / 30px * 1s) ease-in-out 0.3s infinite alternate;
+}
+
+@keyframes spotify-marquee {
+  0%,
+  15% {
+    transform: none;
+  }
+  85%,
+  100% {
+    transform: translateX(calc(-1 * var(--overflow)));
+  }
+}
+
 .spotify-artist {
   font-size: 12.5px;
   color: var(--muted);
+}
+
+/* Live equalizer next to the label. */
+.spotify-bars {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: flex-end;
+  gap: 1.5px;
+  height: 10px;
+}
+
+/* In the card they sit at the end, after the title. */
+.spotify-card .spotify-bars {
+  margin: 0 16px 0 auto;
+}
+
+.spotify-bars i {
+  width: 2px;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--link);
+  transform-origin: bottom;
+  transform: scaleY(0.25);
+  transition: transform 0.3s ease;
+}
+
+.spotify-bars.is-live i {
+  animation: spotify-bar 0.95s ease-in-out infinite alternate;
+}
+
+.spotify-bars.is-live i:nth-child(2) {
+  animation-duration: 0.7s;
+  animation-delay: -0.4s;
+}
+
+.spotify-bars.is-live i:nth-child(3) {
+  animation-duration: 1.15s;
+  animation-delay: -0.2s;
+}
+
+.spotify-bars.is-live i:nth-child(4) {
+  animation-duration: 0.82s;
+  animation-delay: -0.65s;
+}
+
+@keyframes spotify-bar {
+  0% {
+    transform: scaleY(0.25);
+  }
+  35% {
+    transform: scaleY(0.95);
+  }
+  60% {
+    transform: scaleY(0.45);
+  }
+  100% {
+    transform: scaleY(0.8);
+  }
+}
+
+/* Song progress along the bottom edge, carried forward between polls. */
+.spotify-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: color-mix(in srgb, var(--link) 40%, transparent);
+  transform-origin: left;
+  animation: spotify-progress linear forwards;
+}
+
+@keyframes spotify-progress {
+  from {
+    transform: scaleX(var(--from));
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ── Listen-along player: Spotify's embed, docked bottom right in the visualizer ── */
+.listen {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  /* Above the visualizer too. */
+  z-index: 110;
+  width: min(340px, calc(100vw - 32px));
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--link) 18%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+  animation: listen-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.listen-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 2px 6px 4px;
+}
+
+.listen-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.listen-close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.listen-close:hover {
+  background: color-mix(in srgb, var(--link) 12%, transparent);
+  color: var(--heading);
+}
+
+.listen-close svg {
+  width: 14px;
+  height: 14px;
+}
+
+.listen-player {
+  height: 80px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.listen-player iframe {
+  display: block;
+  border: 0;
+}
+
+@keyframes listen-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+}
+
+/* Small screens: above the song panel instead of beside it. */
+@media (max-width: 720px) {
+  .listen {
+    bottom: 104px;
+  }
+}
+
+/* ── Disco ball easter egg: rainbow mode while a song plays ── */
+.disco {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  animation: disco-pop 0.7s var(--spring) both;
+}
+
+.disco:hover {
+  text-decoration: none;
+}
+
+.disco-ball {
+  width: 40px;
+  height: 40px;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+  animation: disco-bob 2.6s ease-in-out infinite alternate;
+  transition: filter 0.3s ease, scale 0.4s var(--spring);
+}
+
+.disco:hover .disco-ball,
+.disco:focus-visible .disco-ball {
+  scale: 1.12;
+  filter: drop-shadow(0 0 6px rgba(255, 95, 162, 0.7)) drop-shadow(0 0 14px rgba(95, 168, 255, 0.6));
+}
+
+/* Little four-pointed glints that twinkle around the ball. */
+.disco-sparkle {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background: #fff;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  pointer-events: none;
+  animation: disco-twinkle 1.8s ease-in-out infinite;
+}
+
+.disco-sparkle:nth-of-type(1) {
+  top: 0;
+  right: 0;
+  background: #ffe066;
+}
+
+.disco-sparkle:nth-of-type(2) {
+  bottom: 4px;
+  left: -2px;
+  width: 7px;
+  height: 7px;
+  background: #5fa8ff;
+  animation-delay: -0.6s;
+}
+
+.disco-sparkle:nth-of-type(3) {
+  top: 6px;
+  left: 2px;
+  width: 6px;
+  height: 6px;
+  background: #ff5f5f;
+  animation-delay: -1.2s;
+}
+
+@keyframes disco-pop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.2) rotate(-40deg);
+  }
+}
+
+@keyframes disco-bob {
+  from {
+    transform: translateY(-2px) rotate(-5deg);
+  }
+  to {
+    transform: translateY(2px) rotate(5deg);
+  }
+}
+
+@keyframes disco-twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.3) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spotify-lift {
+    transition-timing-function: ease;
+  }
+
+  .spotify-card:hover .spotify-title.is-long > span,
+  .listen,
+  .disco,
+  .disco-ball,
+  .disco-sparkle {
+    animation: none;
+  }
+
+  .spotify-bars.is-live i {
+    animation: none;
+    transform: scaleY(0.6);
+  }
 }
 
 /* ── Intro ── */
@@ -1159,6 +1504,318 @@ a:hover {
   }
   to {
     opacity: 1;
+  }
+}
+
+/* ── Visualizer ── */
+/* Always dark: it's a light show, whatever the site theme. */
+.viz {
+  --viz-text: #ececf1;
+  --viz-soft: rgba(236, 236, 241, 0.72);
+  --viz-faint: rgba(236, 236, 241, 0.5);
+  --viz-glass: rgba(8, 9, 16, 0.42);
+  --viz-line: rgba(255, 255, 255, 0.1);
+  --viz-fill: rgba(255, 255, 255, 0.08);
+  --viz-fill-hover: rgba(255, 255, 255, 0.15);
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  background: #05060c;
+  color: var(--viz-text);
+  color-scheme: dark;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.viz.is-idle {
+  cursor: none;
+}
+
+.viz-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.viz-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  color: var(--viz-soft);
+}
+
+.viz-ui {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.viz.is-idle .viz-ui {
+  opacity: 0;
+}
+
+.viz-top,
+.viz-bottom {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.viz-top {
+  top: 16px;
+  align-items: flex-start;
+}
+
+.viz-bottom {
+  bottom: 16px;
+  align-items: flex-end;
+}
+
+.viz-panel {
+  pointer-events: auto;
+  border: 1px solid var(--viz-line);
+  border-radius: 12px;
+  background: var(--viz-glass);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  backdrop-filter: blur(16px) saturate(1.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.viz.is-idle .viz-panel {
+  pointer-events: none;
+}
+
+.viz a {
+  color: inherit;
+}
+
+.viz-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px 0 12px;
+  color: var(--viz-text);
+}
+
+.viz-back:hover,
+.viz-track:hover {
+  text-decoration: none;
+  background: rgba(8, 9, 16, 0.6);
+}
+
+.viz-controls {
+  width: 260px;
+  padding: 6px;
+}
+
+.viz-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.viz-segment {
+  flex: 1;
+  display: flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--viz-fill);
+}
+
+.viz-segment button {
+  flex: 1;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--viz-soft);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.viz-segment button[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.viz-segment button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.viz-icon-btn {
+  height: 32px;
+  border: 1px solid var(--viz-line);
+  border-radius: 8px;
+  background: var(--viz-fill);
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  flex-shrink: 0;
+}
+
+.viz-icon-btn:hover {
+  background: var(--viz-fill-hover);
+}
+
+.viz-icon-btn[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+}
+
+.viz-icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.viz-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.viz-track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  max-width: min(420px, 100%);
+  padding: 8px 18px 8px 8px;
+  color: var(--viz-text);
+}
+
+.viz-track img {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.viz-track-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.viz-track-label {
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--viz-faint);
+}
+
+.viz-track-title,
+.viz-track-artist {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.viz-track-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.viz-track-artist {
+  color: var(--viz-soft);
+}
+
+.viz-track-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--viz-faint);
+}
+
+/* Lights up 1-2-3-4 through each bar: they should flash with the kicks you hear. */
+.viz-beats {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.viz-beats i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  transition: background-color 0.25s ease, transform 0.25s ease;
+}
+
+.viz-beats i.is-on {
+  background: #fff;
+  transform: scale(1.35);
+  transition: none;
+}
+
+.viz-beats i:first-child.is-on {
+  background: #9cc3ff;
+}
+
+.viz-progress {
+  display: block;
+  height: 2px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.viz-progress i {
+  display: block;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.viz-track-empty {
+  padding: 12px 16px;
+  color: var(--viz-soft);
+}
+
+.viz-keys {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--viz-faint);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+@media (hover: none), (max-width: 640px) {
+  .viz-keys {
+    display: none;
+  }
+}
+
+/* The listen-along player sits where the key hints were. */
+.viz.has-player .viz-keys {
+  visibility: hidden;
+}
+
+@media (max-width: 640px) {
+  .viz-controls {
+    width: auto;
   }
 }
 
